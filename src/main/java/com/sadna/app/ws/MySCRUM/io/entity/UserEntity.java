@@ -1,12 +1,13 @@
 package com.sadna.app.ws.MySCRUM.io.entity;
 
+import com.sadna.app.ws.MySCRUM.shared.dto.TaskDto;
+import com.sadna.app.ws.MySCRUM.shared.dto.TeamDto;
 import lombok.Getter;
 import lombok.Setter;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+
+import javax.persistence.*;
 import java.io.Serializable;
+import java.util.List;
 
 
 @Entity(name="users")
@@ -24,11 +25,25 @@ public class UserEntity implements Serializable {
     private String firstName;
 
     @Column(nullable = false,length = 50)
-    private String LastName;
+    private String lastName;
 
     @Column(nullable = false,length = 120,unique = true)
     private String email;
 
-    @Column(nullable = false)
+    @Column(nullable = false,length = 255)
     private String encryptedPassword;
+
+    @Column(nullable = false)
+    private Boolean isManager;
+
+    @OneToMany(mappedBy = "userDetails", cascade = CascadeType.ALL)
+    private List<TaskEntity> tasks;
+
+    @ManyToMany
+    @JoinTable(
+            name = "user_team",
+            joinColumns = @JoinColumn(name = "users_id"),
+            inverseJoinColumns = @JoinColumn(name = "teams_id"))
+    private List<TeamEntity> teams;
+
 }
