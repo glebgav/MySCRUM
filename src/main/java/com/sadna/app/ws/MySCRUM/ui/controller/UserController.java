@@ -12,6 +12,9 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RestController
 @RequestMapping("users")
 public class UserController {
@@ -64,5 +67,22 @@ public class UserController {
         returnVal.setOperationResult(RequestOperationStatus.SUCCESS.name());
         return returnVal;
 
+    }
+
+    @GetMapping
+    public List<UserRest> getUsers(@RequestParam(value = "page", defaultValue = "0") int page
+    ,@RequestParam(value = "limit", defaultValue = "50") int limit){
+        List<UserRest> returnVal = new ArrayList<>();
+
+        List<UserDto> usersDtoList = userService.getUsers(page, limit);
+
+        for(UserDto userDto: usersDtoList)
+        {
+            UserRest userModel = new UserRest();
+            BeanUtils.copyProperties(userDto,userModel);
+            returnVal.add(userModel);
+
+        }
+        return  returnVal;
     }
 }

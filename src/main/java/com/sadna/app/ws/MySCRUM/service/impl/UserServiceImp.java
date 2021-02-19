@@ -6,15 +6,19 @@ import com.sadna.app.ws.MySCRUM.service.UserService;
 import com.sadna.app.ws.MySCRUM.shared.Utils;
 import com.sadna.app.ws.MySCRUM.shared.dto.UserDto;
 import com.sadna.app.ws.MySCRUM.ui.model.response.ErrorMessages;
+import com.sadna.app.ws.MySCRUM.ui.model.response.UserRest;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class UserServiceImp implements UserService {
@@ -94,6 +98,25 @@ public class UserServiceImp implements UserService {
             throw new UsernameNotFoundException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
 
         userRepo.delete(userEntity);
+    }
+
+    @Override
+    public List<UserDto> getUsers(int page, int limit) {
+        List<UserDto> returnVal = new ArrayList<>();
+        if(page > 0) page-=1;
+
+        Pageable pageable =  PageRequest.of(page,limit);
+        Page<UserEntity> usersPage = userRepo.findAll(pageable);
+        List<UserEntity> users = usersPage.getContent();
+
+        for(UserEntity userEntity: users)
+        {
+            UserDto userDto = new UserDto();
+            BeanUtils.copyProperties(userEntity,userDto);
+            returnVal.add(userDto);
+
+        }
+        return returnVal;
     }
 
     @Override
