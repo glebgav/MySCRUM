@@ -1,5 +1,6 @@
 package com.sadna.app.ws.MySCRUM.ui.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sadna.app.ws.MySCRUM.service.UserService;
 import com.sadna.app.ws.MySCRUM.shared.Utils;
 import com.sadna.app.ws.MySCRUM.shared.dto.UserDto;
@@ -16,10 +17,15 @@ public class UserController {
     UserService userService;
 
 
-    @GetMapping
-    public String getUser()
+    @GetMapping(path = "/{id}")
+    public UserRest getUser(@PathVariable String id)
     {
-        return "sdfs";
+        UserRest returnVal = new UserRest();
+
+        UserDto userDto = userService.getUserByUserId(id);
+        BeanUtils.copyProperties(userDto,returnVal);
+
+        return returnVal;
     }
 
 
