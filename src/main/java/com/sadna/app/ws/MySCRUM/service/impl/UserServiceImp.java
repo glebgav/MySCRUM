@@ -5,6 +5,7 @@ import com.sadna.app.ws.MySCRUM.io.repository.UserRepository;
 import com.sadna.app.ws.MySCRUM.service.UserService;
 import com.sadna.app.ws.MySCRUM.shared.Utils;
 import com.sadna.app.ws.MySCRUM.shared.dto.UserDto;
+import com.sadna.app.ws.MySCRUM.ui.model.response.ErrorMessages;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
@@ -49,7 +50,7 @@ public class UserServiceImp implements UserService {
     public UserDto getUser(String email) {
         UserEntity userEntity = userRepo.findByEmail(email);
         if(userEntity==null)
-            throw new UsernameNotFoundException(email);
+            throw new UsernameNotFoundException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
 
         UserDto returnVal = new UserDto();
         BeanUtils.copyProperties(userEntity,returnVal);
@@ -61,7 +62,7 @@ public class UserServiceImp implements UserService {
     public UserDto getUserByUserId(String userId) {
         UserEntity userEntity = userRepo.findByUserId(userId);
         if(userEntity==null)
-            throw new UsernameNotFoundException(userId);
+            throw new UsernameNotFoundException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
 
         UserDto returnVal = new UserDto();
         BeanUtils.copyProperties(userEntity,returnVal);
@@ -69,10 +70,28 @@ public class UserServiceImp implements UserService {
     }
 
     @Override
+    public UserDto updateUser(String userId, UserDto user) {
+        UserDto returnVal = new UserDto();
+        UserEntity userEntity = userRepo.findByUserId(userId);
+        if(userEntity==null)
+            throw new UsernameNotFoundException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
+
+        userEntity.setEmail(user.getEmail());
+        userEntity.setFirstName(user.getFirstName());
+        userEntity.setLastName(user.getLastName());
+        userEntity.setIsManager(user.getIsManager());
+
+        UserEntity updatedUser = userRepo.save(userEntity);
+        BeanUtils.copyProperties(updatedUser,returnVal);
+
+        return returnVal;
+    }
+
+    @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         UserEntity userEntity = userRepo.findByEmail(email);
         if(userEntity==null)
-            throw new UsernameNotFoundException(email);
+            throw new UsernameNotFoundException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
 
         return new User(userEntity.getEmail(),userEntity.getEncryptedPassword(), new ArrayList<>());
     }
