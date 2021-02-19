@@ -13,6 +13,11 @@ public class MyScrumApplication {
 		return new BCryptPasswordEncoder();
 	}
 
+	@Bean
+	public SpringApplicationContext springApplicationContext(){
+		return new SpringApplicationContext();
+	}
+
 	public static void main(String[] args) {
 		SpringApplication.run(MyScrumApplication.class, args);
 	}
