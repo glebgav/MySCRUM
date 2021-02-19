@@ -88,6 +88,15 @@ public class UserServiceImp implements UserService {
     }
 
     @Override
+    public void deleteUser(String userId) {
+        UserEntity userEntity = userRepo.findByUserId(userId);
+        if(userEntity==null)
+            throw new UsernameNotFoundException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
+
+        userRepo.delete(userEntity);
+    }
+
+    @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         UserEntity userEntity = userRepo.findByEmail(email);
         if(userEntity==null)

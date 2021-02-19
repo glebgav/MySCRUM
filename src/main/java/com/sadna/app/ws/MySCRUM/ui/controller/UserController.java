@@ -5,6 +5,8 @@ import com.sadna.app.ws.MySCRUM.service.UserService;
 import com.sadna.app.ws.MySCRUM.shared.Utils;
 import com.sadna.app.ws.MySCRUM.shared.dto.UserDto;
 import com.sadna.app.ws.MySCRUM.ui.model.request.UserDetailsRequestModel;
+import com.sadna.app.ws.MySCRUM.ui.model.response.OperationStatusModel;
+import com.sadna.app.ws.MySCRUM.ui.model.response.RequestOperationStatus;
 import com.sadna.app.ws.MySCRUM.ui.model.response.UserRest;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,9 +55,14 @@ public class UserController {
         return returnVal;
     }
 
-    @DeleteMapping
-    public String deleteUser()
-    {
-        return "sdfs";
+    @DeleteMapping(path = "/{id}")
+    public OperationStatusModel deleteUser(@PathVariable String id) {
+        OperationStatusModel returnVal = new OperationStatusModel();
+
+        userService.deleteUser(id);
+        returnVal.setOperationName("Delete");
+        returnVal.setOperationResult(RequestOperationStatus.SUCCESS.name());
+        return returnVal;
+
     }
 }
