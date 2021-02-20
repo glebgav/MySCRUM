@@ -12,5 +12,6 @@ public class TeamDto implements Serializable {
     private String teamId;
     private String name;
     private List<TaskDto> tasks;
+    private List<UserDto> users;
 
 }

@@ -1,11 +1,14 @@
 package com.sadna.app.ws.MySCRUM.service.impl;
 
 import com.sadna.app.ws.MySCRUM.io.entity.TaskEntity;
+import com.sadna.app.ws.MySCRUM.io.entity.TeamEntity;
 import com.sadna.app.ws.MySCRUM.io.entity.UserEntity;
+import com.sadna.app.ws.MySCRUM.io.repository.TeamRepository;
 import com.sadna.app.ws.MySCRUM.io.repository.UserRepository;
 import com.sadna.app.ws.MySCRUM.service.UserService;
 import com.sadna.app.ws.MySCRUM.shared.Utils;
 import com.sadna.app.ws.MySCRUM.shared.dto.TaskDto;
+import com.sadna.app.ws.MySCRUM.shared.dto.TeamDto;
 import com.sadna.app.ws.MySCRUM.shared.dto.UserDto;
 import com.sadna.app.ws.MySCRUM.ui.model.response.ErrorMessages;
 import org.modelmapper.ModelMapper;
@@ -30,15 +33,35 @@ public class UserServiceImp implements UserService {
     Utils utils;
 
     @Autowired
+    TeamRepository teamRepo;
+
+    @Autowired
     BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Override
     public UserDto createUser(UserDto user) {
-        for(TaskDto task: user.getTasks()){
-            task.setUserDetails(user);
-            task.setTaskId(utils.generateTaskId(20));
+        if(user.getTasks() != null) {
+            for (TaskDto task : user.getTasks()) {
+                task.setUserDetails(user);
+                task.setTaskId(utils.generateTaskId(20));
+            }
         }
         ModelMapper modelMapper = new ModelMapper();
+        List<TeamDto> list = user.getTeams();
+        if(list != null) {
+            for(int i=0; i< list.size();i++){
+                TeamEntity teamFromRepo = teamRepo.findByName(list.get(i).getName());
+                if(teamFromRepo != null){
+                    list.set(i,modelMapper.map(teamFromRepo, TeamDto.class));
+                }
+                else{
+                    TeamDto newTeam = list.get(i);
+                    newTeam.setTeamId(utils.generateTaskId(20));
+                    list.set(i,newTeam);
+                }
+            }
+        }
+
         UserEntity userEntity = modelMapper.map(user, UserEntity.class);
 
         String publicUserId = utils.generateUserId(20);

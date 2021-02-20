@@ -18,6 +18,7 @@ public class UserDto implements Serializable {
     private String encryptedPassword;
     private Boolean isManager;
     private List<TaskDto> tasks;
+    private List<TeamDto> teams;
 
 
 

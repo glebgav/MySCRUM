@@ -39,11 +39,11 @@ public class UserEntity implements Serializable {
     @OneToMany(mappedBy = "userDetails", cascade = CascadeType.PERSIST)
     private List<TaskEntity> tasks;
 
-/*    @ManyToMany
+    @ManyToMany(cascade = {CascadeType.MERGE })
     @JoinTable(
             name = "user_team",
             joinColumns = @JoinColumn(name = "users_id"),
             inverseJoinColumns = @JoinColumn(name = "teams_id"))
-    private List<TeamEntity> teams;*/
+    private List<TeamEntity> teams;
 
 }

@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface  TeamRepository extends PagingAndSortingRepository<TeamEntity, Long> {
     TeamEntity findByTeamId(String teamId);
+    TeamEntity findByName(String name);
 }

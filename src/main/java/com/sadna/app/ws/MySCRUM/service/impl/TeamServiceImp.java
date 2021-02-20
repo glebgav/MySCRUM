@@ -37,9 +37,17 @@ public class TeamServiceImp implements TeamService {
 
     @Override
     public TeamDto createTeam(TeamDto team) {
-        for(TaskDto task: team.getTasks()){
-            task.setTeamDetails(team);
-            task.setTaskId(utils.generateTaskId(20));
+        if(team.getTasks() != null) {
+            for (TaskDto task : team.getTasks()) {
+                task.setTeamDetails(team);
+                task.setTaskId(utils.generateTaskId(20));
+            }
+        }
+        if(team.getUsers() != null) {
+            for (UserDto user : team.getUsers()) {
+                user.getTeams().add(team);
+                user.setUserId(utils.generateTaskId(20));
+            }
         }
         ModelMapper modelMapper = new ModelMapper();
         TeamEntity teamEntity = modelMapper.map(team, TeamEntity.class);

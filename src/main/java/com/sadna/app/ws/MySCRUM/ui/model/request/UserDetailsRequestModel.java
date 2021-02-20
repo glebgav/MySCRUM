@@ -14,5 +14,7 @@ public class UserDetailsRequestModel {
     private String password;
     private Boolean isManager;
     private List<TaskRequestModel> tasks;
+    private List<TeamDetailsRequestModel> teams;
+
 
 }
