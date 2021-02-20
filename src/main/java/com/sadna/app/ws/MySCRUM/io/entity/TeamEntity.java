@@ -22,8 +22,8 @@ public class TeamEntity implements Serializable {
     @Column(nullable = false,length = 50)
     private String name;
 
-/*    @OneToMany(mappedBy = "teamDetails", cascade = CascadeType.ALL)
-    private List<TaskEntity> tasks;*/
+    @OneToMany(mappedBy = "teamDetails", cascade = CascadeType.ALL)
+    private List<TaskEntity> tasks;
 
 /*    @ManyToMany(mappedBy = "teams", cascade = CascadeType.ALL)
     private List<UserEntity> users;*/

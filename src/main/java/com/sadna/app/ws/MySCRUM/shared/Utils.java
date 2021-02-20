@@ -21,6 +21,10 @@ public class Utils {
         return generateRandomString(length);
     }
 
+    public String generateTeamId(int length) {
+        return generateRandomString(length);
+    }
+
     private String generateRandomString(int length) {
         StringBuilder returnValue = new StringBuilder(length);
 

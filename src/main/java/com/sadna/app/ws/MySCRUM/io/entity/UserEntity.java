@@ -36,7 +36,7 @@ public class UserEntity implements Serializable {
     @Column(nullable = false)
     private Boolean isManager;
 
-    @OneToMany(mappedBy = "userDetails", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "userDetails", cascade = CascadeType.PERSIST)
     private List<TaskEntity> tasks;
 
 /*    @ManyToMany

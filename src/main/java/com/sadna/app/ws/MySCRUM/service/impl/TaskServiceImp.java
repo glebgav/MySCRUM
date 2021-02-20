@@ -1,21 +1,17 @@
 package com.sadna.app.ws.MySCRUM.service.impl;
 
 import com.sadna.app.ws.MySCRUM.io.entity.TaskEntity;
+import com.sadna.app.ws.MySCRUM.io.entity.TeamEntity;
 import com.sadna.app.ws.MySCRUM.io.entity.UserEntity;
 import com.sadna.app.ws.MySCRUM.io.repository.TaskRepository;
+import com.sadna.app.ws.MySCRUM.io.repository.TeamRepository;
 import com.sadna.app.ws.MySCRUM.io.repository.UserRepository;
 import com.sadna.app.ws.MySCRUM.service.TaskService;
 import com.sadna.app.ws.MySCRUM.shared.dto.TaskDto;
-import com.sadna.app.ws.MySCRUM.shared.dto.UserDto;
-import com.sadna.app.ws.MySCRUM.ui.model.response.ErrorMessages;
-import com.sadna.app.ws.MySCRUM.ui.model.response.TaskRest;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,9 +21,12 @@ public class TaskServiceImp implements TaskService {
     @Autowired
     UserRepository userRepo;
 
+    @Autowired
+    TeamRepository teamRepo;
+
 
     @Autowired
-    TaskRepository taskRepository;
+    TaskRepository taskRepo;
 
     @Override
     public List<TaskDto> getTasksByUserId(String id) {
@@ -37,7 +36,7 @@ public class TaskServiceImp implements TaskService {
            return returnVal;
 
         ModelMapper modelMapper = new ModelMapper();
-        Iterable<TaskEntity> taskEntityList = taskRepository.findAllByUserDetails(userEntity);
+        Iterable<TaskEntity> taskEntityList = taskRepo.findAllByUserDetails(userEntity);
         if(taskEntityList==null) return returnVal;
 
         for(TaskEntity task: taskEntityList){
@@ -51,7 +50,7 @@ public class TaskServiceImp implements TaskService {
     public TaskDto getTask(String taskId) {
         TaskDto returnVal = null;
 
-        TaskEntity taskEntity = taskRepository.findByTaskId(taskId);
+        TaskEntity taskEntity = taskRepo.findByTaskId(taskId);
 
         if(taskEntity != null){
             returnVal = new ModelMapper().map(taskEntity,TaskDto.class);
@@ -59,5 +58,23 @@ public class TaskServiceImp implements TaskService {
 
         return returnVal;
 
+    }
+
+    @Override
+    public List<TaskDto> getTasksByTeamId(String teamId) {
+        List<TaskDto> returnVal = new ArrayList<>();
+        TeamEntity teamEntity = teamRepo.findByTeamId(teamId);
+        if(teamEntity==null)
+            return returnVal;
+
+        ModelMapper modelMapper = new ModelMapper();
+        Iterable<TaskEntity> taskEntityList = taskRepo.findAllByTeamDetails(teamEntity);
+        if(taskEntityList==null) return returnVal;
+
+        for(TaskEntity task: taskEntityList){
+            returnVal.add(modelMapper.map(task,TaskDto.class));
+        }
+
+        return returnVal;
     }
 }

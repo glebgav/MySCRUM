@@ -13,5 +13,6 @@ public class TaskDto implements Serializable {
     private int status;
     private String description;
     private UserDto userDetails;
+    private TeamDto teamDetails;
 
 }
