@@ -33,8 +33,8 @@ public class TaskEntity implements Serializable {
     @JoinColumn(name = "users_id")
     private UserEntity userDetails;
 
-    @ManyToOne()
+/*    @ManyToOne()
     @JoinColumn(name = "teams_id")
-    private TeamEntity teamDetails;
+    private TeamEntity teamDetails;*/
 
 }

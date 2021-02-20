@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Getter
 @Setter
@@ -16,6 +17,7 @@ public class UserDto implements Serializable {
     private String password;
     private String encryptedPassword;
     private Boolean isManager;
+    private List<TaskDto> tasks;
 
 
 

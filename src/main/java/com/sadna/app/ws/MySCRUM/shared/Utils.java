@@ -17,7 +17,7 @@ public class Utils {
         return generateRandomString(length);
     }
 
-    public String generateAddressId(int length) {
+    public String generateTaskId(int length) {
         return generateRandomString(length);
     }
 

@@ -1,13 +1,14 @@
 package com.sadna.app.ws.MySCRUM.service.impl;
 
+import com.sadna.app.ws.MySCRUM.io.entity.TaskEntity;
 import com.sadna.app.ws.MySCRUM.io.entity.UserEntity;
 import com.sadna.app.ws.MySCRUM.io.repository.UserRepository;
 import com.sadna.app.ws.MySCRUM.service.UserService;
 import com.sadna.app.ws.MySCRUM.shared.Utils;
+import com.sadna.app.ws.MySCRUM.shared.dto.TaskDto;
 import com.sadna.app.ws.MySCRUM.shared.dto.UserDto;
 import com.sadna.app.ws.MySCRUM.ui.model.response.ErrorMessages;
-import com.sadna.app.ws.MySCRUM.ui.model.response.UserRest;
-import org.springframework.beans.BeanUtils;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -33,8 +34,12 @@ public class UserServiceImp implements UserService {
 
     @Override
     public UserDto createUser(UserDto user) {
-        UserEntity userEntity = new UserEntity();
-        BeanUtils.copyProperties(user,userEntity);
+        for(TaskDto task: user.getTasks()){
+            task.setUserDetails(user);
+            task.setTaskId(utils.generateTaskId(20));
+        }
+        ModelMapper modelMapper = new ModelMapper();
+        UserEntity userEntity = modelMapper.map(user, UserEntity.class);
 
         String publicUserId = utils.generateUserId(20);
         userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
@@ -42,12 +47,7 @@ public class UserServiceImp implements UserService {
 
         UserEntity storedUserDetails = userRepo.save(userEntity);
 
-        UserDto returnVal = new UserDto();
-
-
-        BeanUtils.copyProperties(storedUserDetails,returnVal);
-
-        return returnVal;
+        return modelMapper.map(storedUserDetails, UserDto.class);
     }
 
     @Override
@@ -56,9 +56,8 @@ public class UserServiceImp implements UserService {
         if(userEntity==null)
             throw new UsernameNotFoundException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
 
-        UserDto returnVal = new UserDto();
-        BeanUtils.copyProperties(userEntity,returnVal);
-        return returnVal;
+        ModelMapper modelMapper = new ModelMapper();
+        return modelMapper.map(userEntity, UserDto.class);
 
     }
 
@@ -68,14 +67,12 @@ public class UserServiceImp implements UserService {
         if(userEntity==null)
             throw new UsernameNotFoundException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
 
-        UserDto returnVal = new UserDto();
-        BeanUtils.copyProperties(userEntity,returnVal);
-        return returnVal;
+        ModelMapper modelMapper = new ModelMapper();
+        return modelMapper.map(userEntity, UserDto.class);
     }
 
     @Override
     public UserDto updateUser(String userId, UserDto user) {
-        UserDto returnVal = new UserDto();
         UserEntity userEntity = userRepo.findByUserId(userId);
         if(userEntity==null)
             throw new UsernameNotFoundException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
@@ -86,9 +83,9 @@ public class UserServiceImp implements UserService {
         userEntity.setIsManager(user.getIsManager());
 
         UserEntity updatedUser = userRepo.save(userEntity);
-        BeanUtils.copyProperties(updatedUser,returnVal);
 
-        return returnVal;
+        ModelMapper modelMapper = new ModelMapper();
+        return modelMapper.map(updatedUser, UserDto.class);
     }
 
     @Override
@@ -103,6 +100,7 @@ public class UserServiceImp implements UserService {
     @Override
     public List<UserDto> getUsers(int page, int limit) {
         List<UserDto> returnVal = new ArrayList<>();
+        ModelMapper modelMapper = new ModelMapper();
         if(page > 0) page-=1;
 
         Pageable pageable =  PageRequest.of(page,limit);
@@ -111,8 +109,7 @@ public class UserServiceImp implements UserService {
 
         for(UserEntity userEntity: users)
         {
-            UserDto userDto = new UserDto();
-            BeanUtils.copyProperties(userEntity,userDto);
+            UserDto userDto = modelMapper.map(userEntity, UserDto.class);
             returnVal.add(userDto);
 
         }
