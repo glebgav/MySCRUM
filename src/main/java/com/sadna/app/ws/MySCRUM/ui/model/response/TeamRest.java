@@ -12,5 +12,5 @@ public class TeamRest {
     private String teamId;
     private String name;
     private List<TaskRest> tasks;
-    private List<UserFromTeam> users;
+    private List<UserFromTeamRest> users;
 }

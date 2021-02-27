@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class UserFromTeam {
+public class UserFromTeamRest {
     private String userId;
     private String firstName;
     private String LastName;
