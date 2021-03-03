@@ -1,14 +1,13 @@
 package com.sadna.app.ws.MySCRUM.ui.controller;
 
 import com.sadna.app.ws.MySCRUM.service.TaskService;
+import com.sadna.app.ws.MySCRUM.service.TeamService;
 import com.sadna.app.ws.MySCRUM.service.UserService;
 import com.sadna.app.ws.MySCRUM.shared.dto.TaskDto;
+import com.sadna.app.ws.MySCRUM.shared.dto.TeamDto;
 import com.sadna.app.ws.MySCRUM.shared.dto.UserDto;
 import com.sadna.app.ws.MySCRUM.ui.model.request.UserDetailsRequestModel;
-import com.sadna.app.ws.MySCRUM.ui.model.response.OperationStatusModel;
-import com.sadna.app.ws.MySCRUM.ui.model.response.RequestOperationStatus;
-import com.sadna.app.ws.MySCRUM.ui.model.response.TaskRest;
-import com.sadna.app.ws.MySCRUM.ui.model.response.UserRest;
+import com.sadna.app.ws.MySCRUM.ui.model.response.*;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +25,9 @@ public class UserController {
 
     @Autowired
     TaskService taskService;
+
+    @Autowired
+    TeamService teamService;
 
 
     @GetMapping(path = "/{id}")
@@ -117,6 +119,23 @@ public class UserController {
                 returnVal = new ModelMapper().map(taskDto,TaskRest.class);
             }
         }
+        return returnVal;
+
+    }
+
+    @GetMapping(path = "/{id}/teams")
+    public List<TeamFromUserRest> getUserTeams(@PathVariable String id)
+    {
+        ModelMapper modelMapper = new ModelMapper();
+        List<TeamFromUserRest> returnVal = new ArrayList<>();
+
+        List<TeamDto> teamDtoList = teamService.getTeamsByUserId(id);
+
+        if(teamDtoList != null && !teamDtoList.isEmpty()){
+            Type listType = new TypeToken<List<TeamFromUserRest>>(){}.getType();
+            returnVal = modelMapper.map(teamDtoList,listType);
+        }
+
         return returnVal;
 
     }

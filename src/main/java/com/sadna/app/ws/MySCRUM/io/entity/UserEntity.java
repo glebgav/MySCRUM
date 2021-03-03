@@ -36,10 +36,10 @@ public class UserEntity implements Serializable {
     @Column(nullable = false)
     private Boolean isManager;
 
-    @OneToMany(mappedBy = "userDetails", cascade = CascadeType.PERSIST)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "userDetails", cascade = CascadeType.ALL)
     private List<TaskEntity> tasks;
 
-    @ManyToMany(cascade = {CascadeType.MERGE })
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL })
     @JoinTable(
             name = "user_team",
             joinColumns = @JoinColumn(name = "users_id"),

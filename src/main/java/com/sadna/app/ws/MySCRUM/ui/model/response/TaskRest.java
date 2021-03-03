@@ -10,4 +10,6 @@ public class TaskRest {
     private String title;
     private int status;
     private String description;
+    private UserFromTaskRest userDetails;
+
 }

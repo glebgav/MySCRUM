@@ -105,6 +105,23 @@ public class TeamServiceImp implements TeamService {
     }
 
     @Override
+    public List<TeamDto> getTeamsByUserId(String userId) {
+        List<TeamDto> returnVal = new ArrayList<>();
+        Iterable<TeamEntity> teamEntityList = teamRepo.findByUsers_UserId(userId);
+        if(teamEntityList==null)
+            return returnVal;
+
+        ModelMapper modelMapper = new ModelMapper();
+
+        for(TeamEntity team: teamEntityList){
+            returnVal.add(modelMapper.map(team,TeamDto.class));
+        }
+
+        return returnVal;
+    }
+
+
+    @Override
     public void deleteUser(String teamId) {
         TeamEntity teamEntity = teamRepo.findByTeamId(teamId);
         if(teamEntity==null)
