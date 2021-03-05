@@ -11,5 +11,6 @@ public class TaskRest {
     private int status;
     private String description;
     private UserFromTaskRest userDetails;
+    private TeamFromTaskRest teamDetails;
 
 }

@@ -1,5 +1,6 @@
 package com.sadna.app.ws.MySCRUM.ui.controller;
 
+import com.sadna.app.ws.MySCRUM.io.entity.TeamEntity;
 import com.sadna.app.ws.MySCRUM.service.TaskService;
 import com.sadna.app.ws.MySCRUM.service.TeamService;
 import com.sadna.app.ws.MySCRUM.service.UserService;
@@ -138,5 +139,23 @@ public class UserController {
 
         return returnVal;
 
+    }
+
+    @GetMapping(path = "/{id}/teams/tasks")
+    public List<TaskRest> getUserTeamsTasks(@PathVariable String id)
+    {
+        ModelMapper modelMapper = new ModelMapper();
+        List<TaskRest> returnVal = new ArrayList<>();
+
+        List<TeamDto> teamDtoList = teamService.getTeamsByUserId(id);
+
+
+        if(teamDtoList != null && !teamDtoList.isEmpty()){
+            Type listType = new TypeToken<List<TaskRest>>(){}.getType();
+            for(TeamDto team: teamDtoList){
+                returnVal.addAll(modelMapper.map(team.getTasks(),listType));
+            }
+        }
+        return returnVal;
     }
 }
