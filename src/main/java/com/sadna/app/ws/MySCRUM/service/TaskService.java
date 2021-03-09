@@ -5,6 +5,10 @@ import java.util.List;
 
 public interface TaskService {
     List<TaskDto> getTasksByUserId(String userId);
+
     TaskDto getTask(String taskId);
+
     List<TaskDto> getTasksByTeamId(String teamId);
+
+    TaskDto updateTask(String taskId, TaskDto taskDto);
 }

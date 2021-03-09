@@ -8,10 +8,15 @@ import com.sadna.app.ws.MySCRUM.io.repository.TeamRepository;
 import com.sadna.app.ws.MySCRUM.io.repository.UserRepository;
 import com.sadna.app.ws.MySCRUM.service.TaskService;
 import com.sadna.app.ws.MySCRUM.shared.dto.TaskDto;
+import com.sadna.app.ws.MySCRUM.shared.dto.TeamDto;
+import com.sadna.app.ws.MySCRUM.ui.model.response.ErrorMessages;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -76,5 +81,36 @@ public class TaskServiceImp implements TaskService {
         }
 
         return returnVal;
+    }
+
+    @Override
+    public TaskDto updateTask(String taskId, TaskDto taskDto) {
+        TaskEntity taskEntity = taskRepo.findByTaskId(taskId);
+        if(taskEntity==null)
+            throw new UsernameNotFoundException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
+
+        ModelMapper modelMapper = new ModelMapper();
+
+        taskEntity.setTaskId(taskDto.getTaskId());
+        taskEntity.setTitle(taskDto.getTitle());
+        taskEntity.setDescription(taskDto.getDescription());
+        taskEntity.setStatus(taskDto.getStatus());
+
+        if(taskDto.getTeamDetails().getTeamId() !=null){
+            TeamEntity team = taskEntity.getTeamDetails();
+            team.setTeamId(taskDto.getTeamDetails().getTeamId());
+            taskEntity.setTeamDetails(team);
+        }
+
+        if(taskDto.getUserDetails() !=  null) {
+            UserEntity user = taskEntity.getUserDetails();
+            user.setUserId(taskDto.getUserDetails().getUserId());
+            user.setFirstName(taskDto.getUserDetails().getFirstName());
+            taskEntity.setUserDetails(user);
+        }
+
+        TaskEntity updatedTask = taskRepo.save(taskEntity);
+
+        return modelMapper.map(updatedTask, TaskDto.class);
     }
 }

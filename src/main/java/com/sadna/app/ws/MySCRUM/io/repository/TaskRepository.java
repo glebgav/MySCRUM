@@ -11,6 +11,8 @@ import java.util.List;
 @Repository
 public interface TaskRepository extends CrudRepository<TaskEntity,Long>{
     List<TaskEntity>  findAllByUserDetails(UserEntity userEntity);
+
     TaskEntity findByTaskId(String taskId);
+
     Iterable<TaskEntity> findAllByTeamDetails(TeamEntity teamEntity);
 }
