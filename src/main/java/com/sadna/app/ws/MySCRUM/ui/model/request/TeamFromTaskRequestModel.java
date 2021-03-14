@@ -6,6 +6,5 @@ import lombok.Setter;
 @Getter
 @Setter
 public class TeamFromTaskRequestModel {
-    private Long id;
     private String teamId;
 }

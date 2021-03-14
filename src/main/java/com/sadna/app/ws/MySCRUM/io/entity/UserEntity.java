@@ -1,10 +1,7 @@
 package com.sadna.app.ws.MySCRUM.io.entity;
 
-import com.sadna.app.ws.MySCRUM.shared.dto.TaskDto;
-import com.sadna.app.ws.MySCRUM.shared.dto.TeamDto;
 import lombok.Getter;
 import lombok.Setter;
-
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
@@ -36,10 +33,10 @@ public class UserEntity implements Serializable {
     @Column(nullable = false)
     private Boolean isManager;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "userDetails", cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "userDetails")
     private List<TaskEntity> tasks;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL })
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "user_team",
             joinColumns = @JoinColumn(name = "users_id"),

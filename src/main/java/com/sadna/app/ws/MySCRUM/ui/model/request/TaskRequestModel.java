@@ -6,6 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class TaskRequestModel {
+    private String taskId;
     private String title;
     private int status;
     private String description;

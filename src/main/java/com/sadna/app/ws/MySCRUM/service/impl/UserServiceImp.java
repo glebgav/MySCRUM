@@ -3,6 +3,7 @@ package com.sadna.app.ws.MySCRUM.service.impl;
 import com.sadna.app.ws.MySCRUM.io.entity.TaskEntity;
 import com.sadna.app.ws.MySCRUM.io.entity.TeamEntity;
 import com.sadna.app.ws.MySCRUM.io.entity.UserEntity;
+import com.sadna.app.ws.MySCRUM.io.repository.TaskRepository;
 import com.sadna.app.ws.MySCRUM.io.repository.TeamRepository;
 import com.sadna.app.ws.MySCRUM.io.repository.UserRepository;
 import com.sadna.app.ws.MySCRUM.service.UserService;
@@ -38,17 +39,35 @@ public class UserServiceImp implements UserService {
     TeamRepository teamRepo;
 
     @Autowired
+    TaskRepository taskRepo;
+
+    @Autowired
     BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Override
     public UserDto createUser(UserDto user) {
-        if(user.getTasks() != null) {
-            for (TaskDto task : user.getTasks()) {
-                task.setUserDetails(user);
-                task.setTaskId(utils.generateTaskId(20));
+        ModelMapper modelMapper = new ModelMapper();
+
+        String publicUserId = utils.generateUserId(20);
+        user.setUserId(publicUserId);
+
+        List<TaskDto> tasks = user.getTasks();
+        if(tasks != null) {
+            for (int i = 0; i < tasks.size(); i++) {
+                TaskEntity taskFromRepo = taskRepo.findByTaskId(tasks.get(i).getTaskId());
+                TaskDto newTask;
+                if (taskFromRepo != null) {
+                    newTask = modelMapper.map(taskFromRepo, TaskDto.class);
+                } else {
+                    newTask = tasks.get(i);
+                    newTask.setTaskId(utils.generateTaskId(20));
+                }
+                newTask.setUserDetails(user);
+                tasks.set(i, newTask);
             }
         }
-        ModelMapper modelMapper = new ModelMapper();
+
+
         List<TeamDto> list = user.getTeams();
         if(list != null) {
             for(int i=0; i< list.size();i++){
@@ -65,12 +84,14 @@ public class UserServiceImp implements UserService {
         }
 
         UserEntity userEntity = modelMapper.map(user, UserEntity.class);
-
-        String publicUserId = utils.generateUserId(20);
         userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        userEntity.setUserId(publicUserId);
 
         UserEntity storedUserDetails = userRepo.save(userEntity);
+
+        for (TaskEntity task : userEntity.getTasks()) {
+            taskRepo.save(task);
+        }
+
 
         return modelMapper.map(storedUserDetails, UserDto.class);
     }

@@ -1,13 +1,10 @@
 package com.sadna.app.ws.MySCRUM.io.entity;
 
-import com.sadna.app.ws.MySCRUM.shared.dto.TeamDto;
-import com.sadna.app.ws.MySCRUM.shared.dto.UserDto;
 import lombok.Getter;
 import lombok.Setter;
-
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.List;
+
 
 @Entity(name="tasks")
 @Getter
@@ -36,5 +33,4 @@ public class TaskEntity implements Serializable {
     @ManyToOne()
     @JoinColumn(name = "teams_id")
     private TeamEntity teamDetails;
-
 }

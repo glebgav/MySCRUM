@@ -11,6 +11,7 @@ import com.sadna.app.ws.MySCRUM.ui.model.request.UserDetailsRequestModel;
 import com.sadna.app.ws.MySCRUM.ui.model.response.*;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,11 +31,13 @@ public class UserController {
     @Autowired
     TeamService teamService;
 
+    ModelMapper modelMapper = new ModelMapper();
+
+
 
     @GetMapping(path = "/{id}")
     public UserRest getUser(@PathVariable String id)
     {
-        ModelMapper modelMapper = new ModelMapper();
         UserDto userDto = userService.getUserByUserId(id);
 
         return modelMapper.map(userDto,UserRest.class);
@@ -45,7 +48,8 @@ public class UserController {
     @PostMapping
     public UserRest createUser(@RequestBody UserDetailsRequestModel userDetails)
     {
-        ModelMapper modelMapper = new ModelMapper();
+        modelMapper.getConfiguration()
+                .setMatchingStrategy(MatchingStrategies.STRICT);
 
         UserDto userDto = modelMapper.map(userDetails,UserDto.class);
         UserDto createdUser = userService.createUser(userDto);
@@ -57,8 +61,6 @@ public class UserController {
     @PutMapping(path = "/{id}")
     public UserRest updateUser(@PathVariable String id, @RequestBody UserDetailsRequestModel userDetails)
     {
-        ModelMapper modelMapper = new ModelMapper();
-
         UserDto userDto = modelMapper.map(userDetails,UserDto.class);
         UserDto createdUser = userService.updateUser(id, userDto);
 
@@ -81,7 +83,6 @@ public class UserController {
     public List<UserRest> getUsers(@RequestParam(value = "page", defaultValue = "0") int page
     ,@RequestParam(value = "limit", defaultValue = "50") int limit){
         List<UserRest> returnVal = new ArrayList<>();
-        ModelMapper modelMapper = new ModelMapper();
         List<UserDto> usersDtoList = userService.getUsers(page, limit);
 
         for(UserDto userDto: usersDtoList)
@@ -96,7 +97,6 @@ public class UserController {
     @GetMapping(path = "/{id}/tasks")
     public List<TaskRest> getUserTasks(@PathVariable String id)
     {
-        ModelMapper modelMapper = new ModelMapper();
         List<TaskRest> returnVal = new ArrayList<>();
 
         List<TaskDto> taskDtoList = taskService.getTasksByUserId(id);
@@ -127,7 +127,6 @@ public class UserController {
     @GetMapping(path = "/{id}/teams")
     public List<TeamFromUserRest> getUserTeams(@PathVariable String id)
     {
-        ModelMapper modelMapper = new ModelMapper();
         List<TeamFromUserRest> returnVal = new ArrayList<>();
 
         List<TeamDto> teamDtoList = teamService.getTeamsByUserId(id);
@@ -144,7 +143,6 @@ public class UserController {
     @GetMapping(path = "/{id}/teams/tasks")
     public List<TaskRest> getUserTeamsTasks(@PathVariable String id)
     {
-        ModelMapper modelMapper = new ModelMapper();
         List<TaskRest> returnVal = new ArrayList<>();
 
         List<TeamDto> teamDtoList = teamService.getTeamsByUserId(id);
