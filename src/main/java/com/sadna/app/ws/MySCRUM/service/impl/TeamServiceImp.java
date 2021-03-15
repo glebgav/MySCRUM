@@ -3,6 +3,7 @@ package com.sadna.app.ws.MySCRUM.service.impl;
 import com.sadna.app.ws.MySCRUM.io.entity.TaskEntity;
 import com.sadna.app.ws.MySCRUM.io.entity.TeamEntity;
 import com.sadna.app.ws.MySCRUM.io.entity.UserEntity;
+import com.sadna.app.ws.MySCRUM.io.repository.TaskRepository;
 import com.sadna.app.ws.MySCRUM.io.repository.TeamRepository;
 import com.sadna.app.ws.MySCRUM.io.repository.UserRepository;
 import com.sadna.app.ws.MySCRUM.service.TeamService;
@@ -21,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -33,29 +35,60 @@ public class TeamServiceImp implements TeamService {
     TeamRepository teamRepo;
 
     @Autowired
+    UserRepository userRepo;
+
+    @Autowired
+    TaskRepository taskRepo;
+
+    @Autowired
     Utils utils;
 
     @Override
+    @Transactional
     public TeamDto createTeam(TeamDto team) {
+        ModelMapper modelMapper = new ModelMapper();
         if(team.getTasks() != null) {
             for (TaskDto task : team.getTasks()) {
                 task.setTeamDetails(team);
                 task.setTaskId(utils.generateTaskId(20));
             }
         }
-        if(team.getUsers() != null) {
-            for (UserDto user : team.getUsers()) {
-                user.getTeams().add(team);
-                user.setUserId(utils.generateTaskId(20));
+
+        List<UserDto> usersList = team.getUsers();
+        if(usersList != null) {
+            for(int i=0; i< usersList.size();i++){
+                UserEntity userFromRepo = userRepo.findByUserId(usersList.get(i).getUserId());
+                UserDto newUser;
+                if(userFromRepo != null){
+                    newUser = modelMapper.map(userFromRepo, UserDto.class);
+                }
+                else{
+                    newUser = usersList.get(i);
+                    newUser.setUserId(utils.generateTaskId(20));
+                }
+                newUser.getTeams().add(team);
+                usersList.set(i,newUser);
             }
         }
-        ModelMapper modelMapper = new ModelMapper();
+
         TeamEntity teamEntity = modelMapper.map(team, TeamEntity.class);
 
         String publicUserId = utils.generateUserId(20);
         teamEntity.setTeamId(publicUserId);
 
         TeamEntity storedTeamDetails = teamRepo.save(teamEntity);
+
+        if(teamEntity.getUsers() != null){
+            for (UserEntity user : teamEntity.getUsers()) {
+                userRepo.save(user);
+            }
+        }
+
+        if(teamEntity.getTasks() != null){
+            for (TaskEntity task : teamEntity.getTasks()) {
+                taskRepo.save(task);
+            }
+        }
 
         return modelMapper.map(storedTeamDetails, TeamDto.class);
 

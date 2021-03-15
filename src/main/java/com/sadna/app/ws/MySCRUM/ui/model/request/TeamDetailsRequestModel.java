@@ -10,5 +10,5 @@ import java.util.List;
 public class TeamDetailsRequestModel {
     private String name;
     private List<TaskRequestModel> tasks;
-    private List<UserDetailsRequestModel> users;
+    private List<UserRequestModel> users;
 }

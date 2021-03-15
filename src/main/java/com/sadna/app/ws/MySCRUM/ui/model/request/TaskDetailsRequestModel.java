@@ -11,6 +11,6 @@ public class TaskDetailsRequestModel {
     private String title;
     private int status;
     private String description;
-    private UserFromTaskRequestModel userDetails;
-    private TeamFromTaskRequestModel teamDetails;
+    private UserRequestModel userDetails;
+    private TeamRequestModel teamDetails;
 }

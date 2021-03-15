@@ -67,30 +67,41 @@ public class UserServiceImp implements UserService {
             }
         }
 
-
-        List<TeamDto> list = user.getTeams();
-        if(list != null) {
-            for(int i=0; i< list.size();i++){
-                TeamEntity teamFromRepo = teamRepo.findByName(list.get(i).getName());
+        List<TeamDto> teamList = user.getTeams();
+        if(teamList != null) {
+            for(int i=0; i< teamList.size();i++){
+                TeamEntity teamFromRepo = teamRepo.findByName(teamList.get(i).getName());
+                TeamDto newTeam;
                 if(teamFromRepo != null){
-                    list.set(i,modelMapper.map(teamFromRepo, TeamDto.class));
+                    newTeam = modelMapper.map(teamFromRepo, TeamDto.class);
                 }
                 else{
-                    TeamDto newTeam = list.get(i);
+                    newTeam = teamList.get(i);
                     newTeam.setTeamId(utils.generateTaskId(20));
-                    list.set(i,newTeam);
                 }
+                newTeam.getUsers().add(user);
+                teamList.set(i,newTeam);
             }
         }
+
 
         UserEntity userEntity = modelMapper.map(user, UserEntity.class);
         userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
 
         UserEntity storedUserDetails = userRepo.save(userEntity);
 
-        for (TaskEntity task : userEntity.getTasks()) {
-            taskRepo.save(task);
+        if(userEntity.getTeams() != null){
+            for (TeamEntity team : userEntity.getTeams()) {
+                teamRepo.save(team);
+            }
         }
+
+        if(userEntity.getTasks() != null){
+            for (TaskEntity task : userEntity.getTasks()) {
+                taskRepo.save(task);
+            }
+        }
+
 
 
         return modelMapper.map(storedUserDetails, UserDto.class);

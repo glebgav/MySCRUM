@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class UserFromTaskRequestModel {
+public class UserRequestModel {
     private String userId;
     private String firstName;
     private String LastName;

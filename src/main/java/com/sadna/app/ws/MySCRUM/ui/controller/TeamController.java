@@ -8,6 +8,7 @@ import com.sadna.app.ws.MySCRUM.ui.model.request.TeamDetailsRequestModel;
 import com.sadna.app.ws.MySCRUM.ui.model.response.*;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,6 +31,8 @@ public class TeamController {
     public TeamRest createTeam(@RequestBody TeamDetailsRequestModel teamDetails)
     {
         ModelMapper modelMapper = new ModelMapper();
+        modelMapper.getConfiguration()
+                .setMatchingStrategy(MatchingStrategies.STRICT);
 
         TeamDto teamDto = modelMapper.map(teamDetails,TeamDto.class);
         TeamDto createdTeam = teamService.createTeam(teamDto);
