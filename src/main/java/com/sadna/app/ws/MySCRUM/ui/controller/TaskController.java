@@ -7,6 +7,8 @@ import com.sadna.app.ws.MySCRUM.shared.dto.TaskDto;
 import com.sadna.app.ws.MySCRUM.shared.dto.TeamDto;
 import com.sadna.app.ws.MySCRUM.ui.model.request.TaskDetailsRequestModel;
 import com.sadna.app.ws.MySCRUM.ui.model.request.TeamDetailsRequestModel;
+import com.sadna.app.ws.MySCRUM.ui.model.response.OperationStatusModel;
+import com.sadna.app.ws.MySCRUM.ui.model.response.RequestOperationStatus;
 import com.sadna.app.ws.MySCRUM.ui.model.response.TaskRest;
 import com.sadna.app.ws.MySCRUM.ui.model.response.TeamRest;
 import org.modelmapper.ModelMapper;
@@ -52,6 +54,17 @@ public class TaskController {
         TaskDto updatedTask = taskService.updateTask(id, taskDto);
 
         return modelMapper.map(updatedTask,TaskRest.class);
+
+    }
+
+    @DeleteMapping(path = "/{id}")
+    public OperationStatusModel deleteTask(@PathVariable String id) {
+        OperationStatusModel returnVal = new OperationStatusModel();
+
+        taskService.deleteTask(id);
+        returnVal.setOperationName("Delete");
+        returnVal.setOperationResult(RequestOperationStatus.SUCCESS.name());
+        return returnVal;
 
     }
 }

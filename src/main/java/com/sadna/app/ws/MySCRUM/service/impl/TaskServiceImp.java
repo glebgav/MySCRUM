@@ -125,11 +125,11 @@ public class TaskServiceImp implements TaskService {
         TaskEntity taskEntity = modelMapper.map(task, TaskEntity.class);
 
 
-        if(taskEntity.getUserDetails() != null){
+        if (taskEntity.getUserDetails() != null) {
             userRepo.save(taskEntity.getUserDetails());
         }
 
-        if(taskEntity.getTeamDetails() != null){
+        if (taskEntity.getTeamDetails() != null) {
             teamRepo.save(taskEntity.getTeamDetails());
         }
 
@@ -141,6 +141,7 @@ public class TaskServiceImp implements TaskService {
     }
 
     @Override
+    @Transactional
     public TaskDto updateTask(String taskId, TaskDto taskDto) {
         TaskEntity taskEntity = taskRepo.findByTaskId(taskId);
         if (taskEntity == null)
@@ -152,22 +153,92 @@ public class TaskServiceImp implements TaskService {
         taskEntity.setTitle(taskDto.getTitle());
         taskEntity.setDescription(taskDto.getDescription());
         taskEntity.setStatus(taskDto.getStatus());
-
-        if (taskDto.getTeamDetails().getTeamId() != null) {
-            TeamEntity team = taskEntity.getTeamDetails();
-            team.setTeamId(taskDto.getTeamDetails().getTeamId());
-            taskEntity.setTeamDetails(team);
-        }
-
-        if (taskDto.getUserDetails() != null) {
-            UserEntity user = taskEntity.getUserDetails();
-            user.setUserId(taskDto.getUserDetails().getUserId());
-            user.setFirstName(taskDto.getUserDetails().getFirstName());
-            taskEntity.setUserDetails(user);
-        }
+        taskEntity.setUserDetails(updateUsers(taskDto,taskEntity));
+        taskEntity.setTeamDetails(updateTeams(taskDto,taskEntity));
 
         TaskEntity updatedTask = taskRepo.save(taskEntity);
 
         return modelMapper.map(updatedTask, TaskDto.class);
+    }
+
+    @Override
+    public void deleteTask(String taskId) {
+        TaskEntity taskEntity = taskRepo.findByTaskId(taskId);
+        if (taskEntity == null)
+            throw new UsernameNotFoundException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
+
+        taskRepo.delete(taskEntity);
+    }
+
+    private UserEntity updateUsers(TaskDto updatedTask, TaskEntity taskToUpdate){
+        UserEntity newUserFromRepo = null;
+
+        if (updatedTask.getUserDetails() != null) {
+            newUserFromRepo = userRepo.findByUserId(updatedTask.getUserDetails().getUserId());
+            // task has an assigned user
+            if (taskToUpdate.getUserDetails() != null) {
+                // new user assigned to task
+                if (!updatedTask.getUserDetails().getUserId().equals(taskToUpdate.getUserDetails().getUserId())) {
+                    // remove task from old user
+                    UserEntity oldUserFromRepo = userRepo.findByUserId(taskToUpdate.getUserDetails().getUserId());
+                    List<TaskEntity> oldTaskList = oldUserFromRepo.getTasks();
+                    oldTaskList.remove(taskToUpdate);
+
+                    // save changes to db
+                    userRepo.save(oldUserFromRepo);
+                }
+            }
+            // add task to new user
+            List<TaskEntity> tasks = newUserFromRepo.getTasks();
+            tasks.add(taskToUpdate);
+
+            userRepo.save(newUserFromRepo);
+        } else {
+            // task has an assigned user
+            if (taskToUpdate.getUserDetails() != null) {
+                UserEntity oldUserFromRepo = userRepo.findByUserId(taskToUpdate.getUserDetails().getUserId());
+                List<TaskEntity> oldTaskList = oldUserFromRepo.getTasks();
+                oldTaskList.remove(taskToUpdate);
+
+                userRepo.save(oldUserFromRepo);
+            }
+        }
+        return newUserFromRepo;
+    }
+
+    private TeamEntity updateTeams(TaskDto updatedTask, TaskEntity taskToUpdate){
+        TeamEntity newTeamFromRepo = null;
+
+        if (updatedTask.getTeamDetails() != null) {
+            newTeamFromRepo = teamRepo.findByTeamId(updatedTask.getTeamDetails().getTeamId());
+            // task has an assigned team
+            if (taskToUpdate.getTeamDetails() != null) {
+                // new team assigned to task
+                if (!updatedTask.getTeamDetails().getTeamId().equals(taskToUpdate.getTeamDetails().getTeamId())) {
+                    // remove task from old team
+                    TeamEntity oldTeamFromRepo = teamRepo.findByTeamId(taskToUpdate.getTeamDetails().getTeamId());
+                    List<TaskEntity> oldTaskList = oldTeamFromRepo.getTasks();
+                    oldTaskList.remove(taskToUpdate);
+
+                    // save changes to db
+                    teamRepo.save(oldTeamFromRepo);
+                }
+            }
+            // add task to new team
+            List<TaskEntity> tasks = newTeamFromRepo.getTasks();
+            tasks.add(taskToUpdate);
+
+            teamRepo.save(newTeamFromRepo);
+        } else {
+            // task has an assigned team
+            if (taskToUpdate.getUserDetails() != null) {
+                TeamEntity oldTeamFromRepo = teamRepo.findByTeamId(taskToUpdate.getTeamDetails().getTeamId());
+                List<TaskEntity> oldTaskList = oldTeamFromRepo.getTasks();
+                oldTaskList.remove(taskToUpdate);
+
+                teamRepo.save(oldTeamFromRepo);
+            }
+        }
+        return newTeamFromRepo;
     }
 }

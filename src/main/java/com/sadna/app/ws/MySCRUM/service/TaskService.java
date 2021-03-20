@@ -15,4 +15,6 @@ public interface TaskService {
     List<TaskDto> getTasksByTeamId(String teamId);
 
     TaskDto updateTask(String taskId, TaskDto taskDto);
+
+    void deleteTask(String taskId);
 }
