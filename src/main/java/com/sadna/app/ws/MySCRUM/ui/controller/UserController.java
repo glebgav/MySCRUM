@@ -125,14 +125,14 @@ public class UserController {
     }
 
     @GetMapping(path = "/{id}/teams")
-    public List<TeamFromUserRest> getUserTeams(@PathVariable String id)
+    public List<TeamRest> getUserTeams(@PathVariable String id)
     {
-        List<TeamFromUserRest> returnVal = new ArrayList<>();
+        List<TeamRest> returnVal = new ArrayList<>();
 
         List<TeamDto> teamDtoList = teamService.getTeamsByUserId(id);
 
         if(teamDtoList != null && !teamDtoList.isEmpty()){
-            Type listType = new TypeToken<List<TeamFromUserRest>>(){}.getType();
+            Type listType = new TypeToken<List<TeamRest>>(){}.getType();
             returnVal = modelMapper.map(teamDtoList,listType);
         }
 

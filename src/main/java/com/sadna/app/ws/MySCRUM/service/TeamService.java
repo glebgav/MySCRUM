@@ -15,5 +15,5 @@ public interface TeamService {
 
     List<TeamDto> getTeamsByUserId(String userId);
 
-    void deleteUser(String teamId);
+    void deleteTeam(String teamId);
 }

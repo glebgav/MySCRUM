@@ -8,6 +8,7 @@ import java.util.List;
 @Getter
 @Setter
 public class TeamDetailsRequestModel {
+    private String teamId;
     private String name;
     private List<TaskRequestModel> tasks;
     private List<UserRequestModel> users;

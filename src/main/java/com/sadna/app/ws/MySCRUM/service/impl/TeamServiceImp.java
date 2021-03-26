@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.config.Task;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -47,7 +48,7 @@ public class TeamServiceImp implements TeamService {
     @Transactional
     public TeamDto createTeam(TeamDto team) {
         ModelMapper modelMapper = new ModelMapper();
-        if(team.getTasks() != null) {
+        if (team.getTasks() != null) {
             for (TaskDto task : team.getTasks()) {
                 task.setTeamDetails(team);
                 task.setTaskId(utils.generateTaskId(20));
@@ -55,19 +56,18 @@ public class TeamServiceImp implements TeamService {
         }
 
         List<UserDto> usersList = team.getUsers();
-        if(usersList != null) {
-            for(int i=0; i< usersList.size();i++){
+        if (usersList != null) {
+            for (int i = 0; i < usersList.size(); i++) {
                 UserEntity userFromRepo = userRepo.findByUserId(usersList.get(i).getUserId());
                 UserDto newUser;
-                if(userFromRepo != null){
+                if (userFromRepo != null) {
                     newUser = modelMapper.map(userFromRepo, UserDto.class);
-                }
-                else{
+                } else {
                     newUser = usersList.get(i);
                     newUser.setUserId(utils.generateTaskId(20));
                 }
                 newUser.getTeams().add(team);
-                usersList.set(i,newUser);
+                usersList.set(i, newUser);
             }
         }
 
@@ -78,13 +78,13 @@ public class TeamServiceImp implements TeamService {
 
         TeamEntity storedTeamDetails = teamRepo.save(teamEntity);
 
-        if(teamEntity.getUsers() != null){
+        if (teamEntity.getUsers() != null) {
             for (UserEntity user : teamEntity.getUsers()) {
                 userRepo.save(user);
             }
         }
 
-        if(teamEntity.getTasks() != null){
+        if (teamEntity.getTasks() != null) {
             for (TaskEntity task : teamEntity.getTasks()) {
                 taskRepo.save(task);
             }
@@ -97,7 +97,7 @@ public class TeamServiceImp implements TeamService {
     @Override
     public TeamDto getTeamByTeamId(String teamId) {
         TeamEntity teamEntity = teamRepo.findByTeamId(teamId);
-        if(teamEntity==null)
+        if (teamEntity == null)
             throw new UsernameNotFoundException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
 
         return new ModelMapper().map(teamEntity, TeamDto.class);
@@ -107,14 +107,13 @@ public class TeamServiceImp implements TeamService {
     public List<TeamDto> getTeams(int page, int limit) {
         List<TeamDto> returnVal = new ArrayList<>();
         ModelMapper modelMapper = new ModelMapper();
-        if(page > 0) page-=1;
+        if (page > 0) page -= 1;
 
-        Pageable pageable =  PageRequest.of(page,limit);
+        Pageable pageable = PageRequest.of(page, limit);
         Page<TeamEntity> teamsPage = teamRepo.findAll(pageable);
         List<TeamEntity> teams = teamsPage.getContent();
 
-        for(TeamEntity teamEntity: teams)
-        {
+        for (TeamEntity teamEntity : teams) {
             TeamDto teamDto = modelMapper.map(teamEntity, TeamDto.class);
             returnVal.add(teamDto);
 
@@ -124,14 +123,15 @@ public class TeamServiceImp implements TeamService {
 
     @Override
     public TeamDto updateTeam(String teamId, TeamDto team) {
+        ModelMapper modelMapper = new ModelMapper();
         TeamEntity teamEntity = teamRepo.findByTeamId(teamId);
-        if(teamEntity==null)
+        if (teamEntity == null)
             throw new UsernameNotFoundException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
 
-        ModelMapper modelMapper = new ModelMapper();
+
         teamEntity.setName(team.getName());
-        Type listType = new TypeToken<List<TaskEntity>>(){}.getType();
-        teamEntity.setTasks(modelMapper.map(team.getTasks(),listType));
+        updateUsers(team, teamEntity);
+        updateTasks(team, teamEntity);
 
         TeamEntity updatedTeam = teamRepo.save(teamEntity);
         return modelMapper.map(updatedTeam, TeamDto.class);
@@ -141,13 +141,13 @@ public class TeamServiceImp implements TeamService {
     public List<TeamDto> getTeamsByUserId(String userId) {
         List<TeamDto> returnVal = new ArrayList<>();
         Iterable<TeamEntity> teamEntityList = teamRepo.findByUsers_UserId(userId);
-        if(teamEntityList==null)
+        if (teamEntityList == null)
             return returnVal;
 
         ModelMapper modelMapper = new ModelMapper();
 
-        for(TeamEntity team: teamEntityList){
-            returnVal.add(modelMapper.map(team,TeamDto.class));
+        for (TeamEntity team : teamEntityList) {
+            returnVal.add(modelMapper.map(team, TeamDto.class));
         }
 
         return returnVal;
@@ -155,11 +155,60 @@ public class TeamServiceImp implements TeamService {
 
 
     @Override
-    public void deleteUser(String teamId) {
+    public void deleteTeam(String teamId) {
         TeamEntity teamEntity = teamRepo.findByTeamId(teamId);
-        if(teamEntity==null)
+        if (teamEntity == null)
             throw new UsernameNotFoundException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
 
+        if (teamEntity.getUsers() != null) {
+            List<UserEntity> users = teamEntity.getUsers();
+            while (users.size() != 0) {
+                users.get(0).removeTeam(teamEntity);
+            }
+        }
+
+        if (teamEntity.getTasks() != null) {
+            List<TaskEntity> tasks = teamEntity.getTasks();
+            while (tasks.size() != 0) {
+                tasks.get(0).removeTeam(teamEntity);
+            }
+        }
+
         teamRepo.delete(teamEntity);
+    }
+
+
+    private void updateUsers(TeamDto updatedTeam, TeamEntity teamToUpdate) {
+        if (updatedTeam.getUsers() != null) {
+            teamToUpdate.removeAllUsers();
+
+            for (UserDto userDto : updatedTeam.getUsers()) {
+                UserEntity userEntity = userRepo.findByUserId(userDto.getUserId());
+                teamToUpdate.addUser(userEntity);
+            }
+
+        } else {
+            // team has an assigned users
+            if (teamToUpdate.getUsers() != null) {
+                teamToUpdate.removeAllUsers();
+            }
+        }
+    }
+
+    private void updateTasks(TeamDto updatedTeam, TeamEntity teamToUpdate) {
+        if (updatedTeam.getTasks() != null) {
+            teamToUpdate.removeAllTasks();
+
+            for (TaskDto taskDto : updatedTeam.getTasks()) {
+                TaskEntity taskEntity = taskRepo.findByTaskId(taskDto.getTaskId());
+                teamToUpdate.addTask(taskEntity);
+            }
+
+        } else {
+            // team has an assigned tasks
+            if (teamToUpdate.getTasks() != null) {
+                teamToUpdate.removeAllTasks();
+            }
+        }
     }
 }

@@ -84,7 +84,7 @@ public class TeamController {
     }
 
     @GetMapping(path = "/{teamId}/tasks/{taskId}")
-    public TaskRest getUserTask(@PathVariable String teamId, @PathVariable String taskId)
+    public TaskRest getTeamTask(@PathVariable String teamId, @PathVariable String taskId)
     {
         TaskRest returnVal = null;
         if(teamService.getTeamByTeamId(teamId) != null){
@@ -101,6 +101,8 @@ public class TeamController {
     public TeamRest updateTeam(@PathVariable String id, @RequestBody TeamDetailsRequestModel teamDetails)
     {
         ModelMapper modelMapper = new ModelMapper();
+        modelMapper.getConfiguration()
+                .setMatchingStrategy(MatchingStrategies.STRICT);
 
         TeamDto teamDto = modelMapper.map(teamDetails,TeamDto.class);
         TeamDto createdTeam = teamService.updateTeam(id, teamDto);
@@ -110,10 +112,10 @@ public class TeamController {
     }
 
     @DeleteMapping(path = "/{id}")
-    public OperationStatusModel deleteUser(@PathVariable String id) {
+    public OperationStatusModel deleteTeam(@PathVariable String id) {
         OperationStatusModel returnVal = new OperationStatusModel();
 
-        teamService.deleteUser(id);
+        teamService.deleteTeam(id);
         returnVal.setOperationName("Delete");
         returnVal.setOperationResult(RequestOperationStatus.SUCCESS.name());
         return returnVal;

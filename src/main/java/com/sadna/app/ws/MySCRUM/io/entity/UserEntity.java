@@ -43,4 +43,25 @@ public class UserEntity implements Serializable {
             inverseJoinColumns = @JoinColumn(name = "teams_id"))
     private List<TeamEntity> teams;
 
+
+    public void addTeam(TeamEntity team) {
+        teams.add(team);
+        team.getUsers().add(this);
+    }
+
+    public void removeTeam(TeamEntity team) {
+        teams.remove(team);
+        team.getUsers().remove(this);
+    }
+
+    public void addTask(TaskEntity task) {
+        tasks.add(task);
+        task.setUserDetails(this);
+    }
+
+    public void removeTask(TaskEntity task) {
+        tasks.remove(task);
+        task.setUserDetails(null);
+    }
+
 }

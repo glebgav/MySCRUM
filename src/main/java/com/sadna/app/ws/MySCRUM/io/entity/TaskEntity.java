@@ -33,4 +33,14 @@ public class TaskEntity implements Serializable {
     @ManyToOne()
     @JoinColumn(name = "teams_id")
     private TeamEntity teamDetails;
+
+    public void removeTeam(TeamEntity team) {
+        teamDetails = null;
+        team.getTasks().remove(this);
+    }
+
+    public void addTeam(TeamEntity team) {
+        teamDetails = team;
+        team.getTasks().add(this);
+    }
 }
