@@ -17,4 +17,6 @@ public interface TaskService {
     TaskDto updateTask(String taskId, TaskDto taskDto);
 
     void deleteTask(String taskId);
+
+    List<TaskDto> getTasks(int page, int limit);
 }

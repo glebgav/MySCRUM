@@ -6,7 +6,6 @@ import com.sadna.app.ws.MySCRUM.service.UserService;
 import com.sadna.app.ws.MySCRUM.shared.dto.TaskDto;
 import com.sadna.app.ws.MySCRUM.shared.dto.TeamDto;
 import com.sadna.app.ws.MySCRUM.ui.model.request.TaskDetailsRequestModel;
-import com.sadna.app.ws.MySCRUM.ui.model.request.TeamDetailsRequestModel;
 import com.sadna.app.ws.MySCRUM.ui.model.response.OperationStatusModel;
 import com.sadna.app.ws.MySCRUM.ui.model.response.RequestOperationStatus;
 import com.sadna.app.ws.MySCRUM.ui.model.response.TaskRest;
@@ -15,6 +14,9 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("tasks")
@@ -41,6 +43,22 @@ public class TaskController {
 
         return modelMapper.map(createdTask,TaskRest.class);
 
+    }
+
+    @GetMapping
+    public List<TaskRest> getTasks(@RequestParam(value = "page", defaultValue = "0") int page
+            , @RequestParam(value = "limit", defaultValue = "50") int limit){
+        List<TaskRest> returnVal = new ArrayList<>();
+        ModelMapper modelMapper = new ModelMapper();
+        List<TaskDto> tasksDtoList = taskService.getTasks(page, limit);
+
+        for(TaskDto taskDto: tasksDtoList)
+        {
+            TaskRest taskModel = modelMapper.map(taskDto,TaskRest.class);
+            returnVal.add(taskModel);
+
+        }
+        return  returnVal;
     }
 
     @PutMapping(path = "/{id}")

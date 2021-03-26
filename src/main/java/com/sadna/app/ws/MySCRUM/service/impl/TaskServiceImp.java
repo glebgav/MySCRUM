@@ -14,6 +14,9 @@ import com.sadna.app.ws.MySCRUM.shared.dto.UserDto;
 import com.sadna.app.ws.MySCRUM.ui.model.response.ErrorMessages;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +38,25 @@ public class TaskServiceImp implements TaskService {
 
     @Autowired
     Utils utils;
+
+    @Override
+    public List<TaskDto> getTasks(int page, int limit) {
+        List<TaskDto> returnVal = new ArrayList<>();
+        ModelMapper modelMapper = new ModelMapper();
+        if(page > 0) page-=1;
+
+        Pageable pageable =  PageRequest.of(page,limit);
+        Page<TaskEntity> tasksPage = taskRepo.findAll(pageable);
+        List<TaskEntity> tasks = tasksPage.getContent();
+
+        for(TaskEntity taskEntity: tasks)
+        {
+            TaskDto taskDto = modelMapper.map(taskEntity, TaskDto.class);
+            returnVal.add(taskDto);
+
+        }
+        return returnVal;
+    }
 
     @Override
     public List<TaskDto> getTasksByUserId(String id) {
@@ -167,6 +189,8 @@ public class TaskServiceImp implements TaskService {
         taskRepo.delete(taskEntity);
     }
 
+
+
     private void updateUsers(TaskDto updatedTask, TaskEntity taskToUpdate){
         UserEntity newUserFromRepo;
 
@@ -210,7 +234,7 @@ public class TaskServiceImp implements TaskService {
             newTeamFromRepo.addTask(taskToUpdate);
         } else {
             // task has an assigned team
-            if (taskToUpdate.getUserDetails() != null) {
+            if (taskToUpdate.getTeamDetails() != null) {
                 TeamEntity oldTeamFromRepo = teamRepo.findByTeamId(taskToUpdate.getTeamDetails().getTeamId());
                 oldTeamFromRepo.removeTask(taskToUpdate);
             }
