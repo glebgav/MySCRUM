@@ -84,7 +84,6 @@ public class UserServiceImp implements UserService {
             }
         }
 
-
         UserEntity userEntity = modelMapper.map(user, UserEntity.class);
         userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
 
@@ -140,6 +139,12 @@ public class UserServiceImp implements UserService {
         userEntity.setLastName(user.getLastName());
         userEntity.setIsManager(user.getIsManager());
 
+        if(user.getPassword() != null){
+            userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+        }
+        updateTasks(user,userEntity);
+        updateTeams(user, userEntity);
+
         UserEntity updatedUser = userRepo.save(userEntity);
 
         ModelMapper modelMapper = new ModelMapper();
@@ -151,6 +156,9 @@ public class UserServiceImp implements UserService {
         UserEntity userEntity = userRepo.findByUserId(userId);
         if(userEntity==null)
             throw new UsernameNotFoundException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
+
+        userEntity.removeAllTeams();
+        userEntity.removeAllTasks();
 
         userRepo.delete(userEntity);
     }
@@ -181,5 +189,41 @@ public class UserServiceImp implements UserService {
             throw new UsernameNotFoundException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
 
         return new User(userEntity.getEmail(),userEntity.getEncryptedPassword(), new ArrayList<>());
+    }
+
+    private void updateTasks(UserDto updatedUser, UserEntity userToUpdate) {
+        List<TaskDto> newTasks = updatedUser.getTasks();
+        if (newTasks != null) {
+            userToUpdate.removeAllTasks();
+
+            for (TaskDto taskDto : newTasks) {
+                TaskEntity taskEntity = taskRepo.findByTaskId(taskDto.getTaskId());
+                userToUpdate.addTask(taskEntity);
+            }
+
+        } else {
+            // user has an assigned tasks
+            if (userToUpdate.getTasks() != null) {
+                userToUpdate.removeAllTasks();
+            }
+        }
+    }
+
+    private void updateTeams(UserDto updatedUser, UserEntity userToUpdate) {
+        List<TeamDto> newTeams = updatedUser.getTeams();
+        if (newTeams != null) {
+            userToUpdate.removeAllTeams();
+
+            for (TeamDto teamDto : newTeams) {
+                TeamEntity teamEntity = teamRepo.findByTeamId(teamDto.getTeamId());
+                userToUpdate.addTeam(teamEntity);
+            }
+
+        } else {
+            // user has an assigned teams
+            if (userToUpdate.getTeams() != null) {
+                userToUpdate.removeAllTeams();
+            }
+        }
     }
 }

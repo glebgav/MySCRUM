@@ -61,6 +61,9 @@ public class UserController {
     @PutMapping(path = "/{id}")
     public UserRest updateUser(@PathVariable String id, @RequestBody UserDetailsRequestModel userDetails)
     {
+        modelMapper.getConfiguration()
+                .setMatchingStrategy(MatchingStrategies.STRICT);
+
         UserDto userDto = modelMapper.map(userDetails,UserDto.class);
         UserDto createdUser = userService.updateUser(id, userDto);
 

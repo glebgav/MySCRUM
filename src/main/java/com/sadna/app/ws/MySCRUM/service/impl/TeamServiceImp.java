@@ -160,29 +160,19 @@ public class TeamServiceImp implements TeamService {
         if (teamEntity == null)
             throw new UsernameNotFoundException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
 
-        if (teamEntity.getUsers() != null) {
-            List<UserEntity> users = teamEntity.getUsers();
-            while (users.size() != 0) {
-                users.get(0).removeTeam(teamEntity);
-            }
-        }
-
-        if (teamEntity.getTasks() != null) {
-            List<TaskEntity> tasks = teamEntity.getTasks();
-            while (tasks.size() != 0) {
-                tasks.get(0).removeTeam(teamEntity);
-            }
-        }
+        teamEntity.removeAllUsers();
+        teamEntity.removeAllTasks();
 
         teamRepo.delete(teamEntity);
     }
 
 
     private void updateUsers(TeamDto updatedTeam, TeamEntity teamToUpdate) {
-        if (updatedTeam.getUsers() != null) {
+        List<UserDto> newUsers = updatedTeam.getUsers();
+        if (newUsers != null) {
             teamToUpdate.removeAllUsers();
 
-            for (UserDto userDto : updatedTeam.getUsers()) {
+            for (UserDto userDto : newUsers) {
                 UserEntity userEntity = userRepo.findByUserId(userDto.getUserId());
                 teamToUpdate.addUser(userEntity);
             }
@@ -196,10 +186,11 @@ public class TeamServiceImp implements TeamService {
     }
 
     private void updateTasks(TeamDto updatedTeam, TeamEntity teamToUpdate) {
-        if (updatedTeam.getTasks() != null) {
+        List<TaskDto> newTasks = updatedTeam.getTasks();
+        if (newTasks != null) {
             teamToUpdate.removeAllTasks();
 
-            for (TaskDto taskDto : updatedTeam.getTasks()) {
+            for (TaskDto taskDto : newTasks) {
                 TaskEntity taskEntity = taskRepo.findByTaskId(taskDto.getTaskId());
                 teamToUpdate.addTask(taskEntity);
             }

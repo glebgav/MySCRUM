@@ -2,6 +2,8 @@ package com.sadna.app.ws.MySCRUM.io.entity;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.catalina.User;
+
 import javax.persistence.*;
 import java.io.Serializable;
 
@@ -42,5 +44,15 @@ public class TaskEntity implements Serializable {
     public void addTeam(TeamEntity team) {
         teamDetails = team;
         team.getTasks().add(this);
+    }
+
+    public void removeUser(UserEntity user) {
+        userDetails = null;
+        user.getTasks().remove(this);
+    }
+
+    public void addUser(UserEntity user) {
+        userDetails = user;
+        user.getTasks().add(this);
     }
 }

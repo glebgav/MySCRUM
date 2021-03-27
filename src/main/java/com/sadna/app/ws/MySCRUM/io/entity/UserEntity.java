@@ -54,6 +54,15 @@ public class UserEntity implements Serializable {
         team.getUsers().remove(this);
     }
 
+    public void removeAllTeams() {
+        if(teams != null){
+            while (teams.size() != 0){
+                teams.get(0).removeUser(this);
+            }
+            teams.clear();
+        }
+    }
+
     public void addTask(TaskEntity task) {
         tasks.add(task);
         task.setUserDetails(this);
@@ -62,6 +71,15 @@ public class UserEntity implements Serializable {
     public void removeTask(TaskEntity task) {
         tasks.remove(task);
         task.setUserDetails(null);
+    }
+
+    public void removeAllTasks(){
+        if(tasks != null){
+            while (tasks.size() != 0){
+                tasks.get(0).removeUser(this);
+            }
+            tasks.clear();
+        }
     }
 
 }
