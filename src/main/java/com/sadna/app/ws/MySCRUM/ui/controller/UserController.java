@@ -1,6 +1,6 @@
 package com.sadna.app.ws.MySCRUM.ui.controller;
 
-import com.sadna.app.ws.MySCRUM.io.entity.TeamEntity;
+import com.sadna.app.ws.MySCRUM.exception.ServiceException;
 import com.sadna.app.ws.MySCRUM.service.TaskService;
 import com.sadna.app.ws.MySCRUM.service.TeamService;
 import com.sadna.app.ws.MySCRUM.service.UserService;
@@ -36,18 +36,15 @@ public class UserController {
 
 
     @GetMapping(path = "/{id}")
-    public UserRest getUser(@PathVariable String id)
-    {
+    public UserRest getUser(@PathVariable String id) {
         UserDto userDto = userService.getUserByUserId(id);
 
         return modelMapper.map(userDto,UserRest.class);
-
     }
 
 
     @PostMapping
-    public UserRest createUser(@RequestBody UserDetailsRequestModel userDetails)
-    {
+    public UserRest createUser(@RequestBody UserDetailsRequestModel userDetails) {
         modelMapper.getConfiguration()
                 .setMatchingStrategy(MatchingStrategies.STRICT);
 
@@ -59,8 +56,7 @@ public class UserController {
     }
 
     @PutMapping(path = "/{id}")
-    public UserRest updateUser(@PathVariable String id, @RequestBody UserDetailsRequestModel userDetails)
-    {
+    public UserRest updateUser(@PathVariable String id, @RequestBody UserDetailsRequestModel userDetails) {
         modelMapper.getConfiguration()
                 .setMatchingStrategy(MatchingStrategies.STRICT);
 
@@ -72,14 +68,14 @@ public class UserController {
     }
 
     @DeleteMapping(path = "/{id}")
-    public OperationStatusModel deleteUser(@PathVariable String id) {
+    public OperationStatusModel deleteUser(@PathVariable String id) throws ServiceException {
+
         OperationStatusModel returnVal = new OperationStatusModel();
 
         userService.deleteUser(id);
         returnVal.setOperationName("Delete");
         returnVal.setOperationResult(RequestOperationStatus.SUCCESS.name());
         return returnVal;
-
     }
 
     @GetMapping

@@ -1,5 +1,6 @@
 package com.sadna.app.ws.MySCRUM.service.impl;
 
+import com.sadna.app.ws.MySCRUM.exception.ServiceException;
 import com.sadna.app.ws.MySCRUM.io.entity.TaskEntity;
 import com.sadna.app.ws.MySCRUM.io.entity.TeamEntity;
 import com.sadna.app.ws.MySCRUM.io.entity.UserEntity;
@@ -111,6 +112,8 @@ public class TaskServiceImp implements TaskService {
     @Override
     @Transactional
     public TaskDto createTask(TaskDto task) {
+        if(task.getTitle() == null ) throw  new ServiceException(ErrorMessages.MISSING_REQUIRED_FIELD.getErrorMessage());
+
         ModelMapper modelMapper = new ModelMapper();
         task.setTaskId(utils.generateTaskId(20));
 
@@ -122,7 +125,7 @@ public class TaskServiceImp implements TaskService {
                 newTeam = modelMapper.map(teamFromRepo, TeamDto.class);
             } else {
                 newTeam = team;
-                newTeam.setTeamId(utils.generateTaskId(20));
+                newTeam.setTeamId(utils.generateTeamId(20));
             }
             newTeam.getTasks().add(task);
             task.setTeamDetails(newTeam);
@@ -136,7 +139,7 @@ public class TaskServiceImp implements TaskService {
                 newUser = modelMapper.map(userFromRepo, UserDto.class);
             } else {
                 newUser = user;
-                newUser.setUserId(utils.generateTaskId(20));
+                newUser.setUserId(utils.generateUserId(20));
             }
             newUser.getTasks().add(task);
             task.setUserDetails(newUser);
@@ -162,9 +165,10 @@ public class TaskServiceImp implements TaskService {
 
     @Override
     public TaskDto updateTask(String taskId, TaskDto taskDto) {
+        if(taskDto.getTitle() == null ) throw  new ServiceException(ErrorMessages.MISSING_REQUIRED_FIELD.getErrorMessage());
         TaskEntity taskEntity = taskRepo.findByTaskId(taskId);
         if (taskEntity == null)
-            throw new UsernameNotFoundException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
+            throw new ServiceException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
 
         ModelMapper modelMapper = new ModelMapper();
 
@@ -175,18 +179,25 @@ public class TaskServiceImp implements TaskService {
         updateUsers(taskDto,taskEntity);
         updateTeams(taskDto,taskEntity);
 
-        TaskEntity updatedTask = taskRepo.save(taskEntity);
-
-        return modelMapper.map(updatedTask, TaskDto.class);
+        try {
+            TaskEntity updatedTask = taskRepo.save(taskEntity);
+            return modelMapper.map(updatedTask, TaskDto.class);
+        }catch (Exception e){
+            throw new ServiceException(ErrorMessages.COULD_NOT_UPDATE_RECORD.getErrorMessage());
+        }
     }
 
     @Override
     public void deleteTask(String taskId) {
         TaskEntity taskEntity = taskRepo.findByTaskId(taskId);
         if (taskEntity == null)
-            throw new UsernameNotFoundException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
+            throw new ServiceException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
 
-        taskRepo.delete(taskEntity);
+        try {
+            taskRepo.delete(taskEntity);
+        }catch (Exception e){
+            throw new ServiceException(ErrorMessages.COULD_NOT_DELETE_RECORD.getErrorMessage());
+        }
     }
 
 

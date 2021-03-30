@@ -1,5 +1,6 @@
 package com.sadna.app.ws.MySCRUM.service.impl;
 
+import com.sadna.app.ws.MySCRUM.exception.ServiceException;
 import com.sadna.app.ws.MySCRUM.io.entity.TaskEntity;
 import com.sadna.app.ws.MySCRUM.io.entity.TeamEntity;
 import com.sadna.app.ws.MySCRUM.io.entity.UserEntity;
@@ -12,20 +13,14 @@ import com.sadna.app.ws.MySCRUM.shared.dto.TaskDto;
 import com.sadna.app.ws.MySCRUM.shared.dto.TeamDto;
 import com.sadna.app.ws.MySCRUM.shared.dto.UserDto;
 import com.sadna.app.ws.MySCRUM.ui.model.response.ErrorMessages;
-import com.sadna.app.ws.MySCRUM.ui.model.response.TaskRest;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.config.Task;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +43,10 @@ public class TeamServiceImp implements TeamService {
     @Transactional
     public TeamDto createTeam(TeamDto team) {
         ModelMapper modelMapper = new ModelMapper();
+
+        if(team.getName() == null) throw  new ServiceException(ErrorMessages.MISSING_REQUIRED_FIELD.getErrorMessage());
+
+
         if (team.getTasks() != null) {
             for (TaskDto task : team.getTasks()) {
                 task.setTeamDetails(team);
@@ -64,7 +63,7 @@ public class TeamServiceImp implements TeamService {
                     newUser = modelMapper.map(userFromRepo, UserDto.class);
                 } else {
                     newUser = usersList.get(i);
-                    newUser.setUserId(utils.generateTaskId(20));
+                    newUser.setUserId(utils.generateUserId(20));
                 }
                 newUser.getTeams().add(team);
                 usersList.set(i, newUser);
@@ -73,8 +72,8 @@ public class TeamServiceImp implements TeamService {
 
         TeamEntity teamEntity = modelMapper.map(team, TeamEntity.class);
 
-        String publicUserId = utils.generateUserId(20);
-        teamEntity.setTeamId(publicUserId);
+        String publicTeamId = utils.generateTeamId(20);
+        teamEntity.setTeamId(publicTeamId);
 
         TeamEntity storedTeamDetails = teamRepo.save(teamEntity);
 
@@ -98,7 +97,7 @@ public class TeamServiceImp implements TeamService {
     public TeamDto getTeamByTeamId(String teamId) {
         TeamEntity teamEntity = teamRepo.findByTeamId(teamId);
         if (teamEntity == null)
-            throw new UsernameNotFoundException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
+            throw new ServiceException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
 
         return new ModelMapper().map(teamEntity, TeamDto.class);
     }
@@ -123,18 +122,24 @@ public class TeamServiceImp implements TeamService {
 
     @Override
     public TeamDto updateTeam(String teamId, TeamDto team) {
+        if(team.getName() == null) throw  new ServiceException(ErrorMessages.MISSING_REQUIRED_FIELD.getErrorMessage());
+
         ModelMapper modelMapper = new ModelMapper();
         TeamEntity teamEntity = teamRepo.findByTeamId(teamId);
         if (teamEntity == null)
-            throw new UsernameNotFoundException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
+            throw new ServiceException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
 
 
         teamEntity.setName(team.getName());
         updateUsers(team, teamEntity);
         updateTasks(team, teamEntity);
 
-        TeamEntity updatedTeam = teamRepo.save(teamEntity);
-        return modelMapper.map(updatedTeam, TeamDto.class);
+        try {
+            TeamEntity updatedTeam = teamRepo.save(teamEntity);
+            return modelMapper.map(updatedTeam, TeamDto.class);
+        }catch (Exception e){
+            throw new ServiceException(ErrorMessages.COULD_NOT_UPDATE_RECORD.getErrorMessage());
+        }
     }
 
     @Override
@@ -158,12 +163,17 @@ public class TeamServiceImp implements TeamService {
     public void deleteTeam(String teamId) {
         TeamEntity teamEntity = teamRepo.findByTeamId(teamId);
         if (teamEntity == null)
-            throw new UsernameNotFoundException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
+            throw new ServiceException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
 
         teamEntity.removeAllUsers();
         teamEntity.removeAllTasks();
 
-        teamRepo.delete(teamEntity);
+        try {
+            teamRepo.delete(teamEntity);
+        }catch (Exception e){
+            throw new ServiceException(ErrorMessages.COULD_NOT_DELETE_RECORD.getErrorMessage());
+        }
+
     }
 
 

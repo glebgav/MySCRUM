@@ -1,5 +1,6 @@
 package com.sadna.app.ws.MySCRUM.service.impl;
 
+import com.sadna.app.ws.MySCRUM.exception.ServiceException;
 import com.sadna.app.ws.MySCRUM.io.entity.TaskEntity;
 import com.sadna.app.ws.MySCRUM.io.entity.TeamEntity;
 import com.sadna.app.ws.MySCRUM.io.entity.UserEntity;
@@ -46,8 +47,10 @@ public class UserServiceImp implements UserService {
 
     @Override
     public UserDto createUser(UserDto user) {
-        ModelMapper modelMapper = new ModelMapper();
+        if(user.getPassword() == null || user.getEmail() == null || user.getFirstName() == null || user.getLastName() == null ||
+                user.getIsManager() == null) throw  new ServiceException(ErrorMessages.MISSING_REQUIRED_FIELD.getErrorMessage());
 
+        ModelMapper modelMapper = new ModelMapper();
         String publicUserId = utils.generateUserId(20);
         user.setUserId(publicUserId);
 
@@ -77,7 +80,7 @@ public class UserServiceImp implements UserService {
                 }
                 else{
                     newTeam = teamList.get(i);
-                    newTeam.setTeamId(utils.generateTaskId(20));
+                    newTeam.setTeamId(utils.generateTeamId(20));
                 }
                 newTeam.getUsers().add(user);
                 teamList.set(i,newTeam);
@@ -111,7 +114,7 @@ public class UserServiceImp implements UserService {
     public UserDto getUser(String email) {
         UserEntity userEntity = userRepo.findByEmail(email);
         if(userEntity==null)
-            throw new UsernameNotFoundException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
+            throw new ServiceException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
 
         ModelMapper modelMapper = new ModelMapper();
         return modelMapper.map(userEntity, UserDto.class);
@@ -122,7 +125,7 @@ public class UserServiceImp implements UserService {
     public UserDto getUserByUserId(String userId) {
         UserEntity userEntity = userRepo.findByUserId(userId);
         if(userEntity==null)
-            throw new UsernameNotFoundException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
+            throw new ServiceException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
 
         ModelMapper modelMapper = new ModelMapper();
         return modelMapper.map(userEntity, UserDto.class);
@@ -132,35 +135,46 @@ public class UserServiceImp implements UserService {
     public UserDto updateUser(String userId, UserDto user) {
         UserEntity userEntity = userRepo.findByUserId(userId);
         if(userEntity==null)
-            throw new UsernameNotFoundException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
+            throw new ServiceException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
+
+        if(user.getPassword() == null || user.getEmail() == null || user.getFirstName() == null || user.getLastName() == null ||
+        user.getIsManager() == null) throw  new ServiceException(ErrorMessages.MISSING_REQUIRED_FIELD.getErrorMessage());
 
         userEntity.setEmail(user.getEmail());
         userEntity.setFirstName(user.getFirstName());
         userEntity.setLastName(user.getLastName());
         userEntity.setIsManager(user.getIsManager());
+        try {
+            if(user.getPassword() != null){
+                userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+            }
+            updateTasks(user,userEntity);
+            updateTeams(user, userEntity);
 
-        if(user.getPassword() != null){
-            userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+            UserEntity updatedUser = userRepo.save(userEntity);
+
+            ModelMapper modelMapper = new ModelMapper();
+            return modelMapper.map(updatedUser, UserDto.class);
+        }catch (Exception e){
+            throw new ServiceException(ErrorMessages.COULD_NOT_UPDATE_RECORD.getErrorMessage());
         }
-        updateTasks(user,userEntity);
-        updateTeams(user, userEntity);
-
-        UserEntity updatedUser = userRepo.save(userEntity);
-
-        ModelMapper modelMapper = new ModelMapper();
-        return modelMapper.map(updatedUser, UserDto.class);
     }
 
     @Override
     public void deleteUser(String userId) {
         UserEntity userEntity = userRepo.findByUserId(userId);
         if(userEntity==null)
-            throw new UsernameNotFoundException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
+            throw new ServiceException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
 
         userEntity.removeAllTeams();
         userEntity.removeAllTasks();
 
-        userRepo.delete(userEntity);
+        try {
+            userRepo.delete(userEntity);
+        }catch (Exception e){
+            throw new ServiceException(ErrorMessages.COULD_NOT_DELETE_RECORD.getErrorMessage());
+        }
+
     }
 
     @Override
@@ -186,7 +200,7 @@ public class UserServiceImp implements UserService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         UserEntity userEntity = userRepo.findByEmail(email);
         if(userEntity==null)
-            throw new UsernameNotFoundException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
+            throw new ServiceException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
 
         return new User(userEntity.getEmail(),userEntity.getEncryptedPassword(), new ArrayList<>());
     }
