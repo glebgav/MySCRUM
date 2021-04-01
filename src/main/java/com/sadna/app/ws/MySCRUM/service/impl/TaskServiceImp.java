@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -112,7 +111,15 @@ public class TaskServiceImp implements TaskService {
     @Override
     @Transactional
     public TaskDto createTask(TaskDto task) {
+        boolean hasNewUser = false;
+        boolean hasNewTeam = false;
+        UserDto newUser = null;
+        TeamDto newTeam = null;
+
         if(task.getTitle() == null ) throw  new ServiceException(ErrorMessages.MISSING_REQUIRED_FIELD.getErrorMessage());
+
+        if(taskRepo.findByTitle((task.getTitle())) != null)
+            throw  new ServiceException(ErrorMessages.RECORD_ALREADY_EXISTS.getErrorMessage());
 
         ModelMapper modelMapper = new ModelMapper();
         task.setTaskId(utils.generateTaskId(20));
@@ -120,10 +127,10 @@ public class TaskServiceImp implements TaskService {
         TeamDto team = task.getTeamDetails();
         if (team != null) {
             TeamEntity teamFromRepo = teamRepo.findByTeamId(team.getTeamId());
-            TeamDto newTeam;
             if (teamFromRepo != null) {
                 newTeam = modelMapper.map(teamFromRepo, TeamDto.class);
             } else {
+                hasNewTeam = true;
                 newTeam = team;
                 newTeam.setTeamId(utils.generateTeamId(20));
             }
@@ -134,16 +141,27 @@ public class TaskServiceImp implements TaskService {
         UserDto user = task.getUserDetails();
         if (user != null) {
             UserEntity userFromRepo = userRepo.findByUserId(user.getUserId());
-            UserDto newUser;
             if (userFromRepo != null) {
                 newUser = modelMapper.map(userFromRepo, UserDto.class);
             } else {
+                hasNewUser = true;
                 newUser = user;
                 newUser.setUserId(utils.generateUserId(20));
             }
             newUser.getTasks().add(task);
             task.setUserDetails(newUser);
         }
+
+
+        if(newTeam!= null && newUser != null && (hasNewTeam || hasNewUser)){
+            newTeam.getUsers().add(newUser);
+            newUser.getTeams().add(newTeam);
+        }
+        else if(!hasNewTeam && !hasNewUser){
+            if(!checkIfUserInTeam(task))
+                throw new ServiceException(ErrorMessages.USER_IS_NOT_IN_TEAM.getErrorMessage());
+        }
+
 
         TaskEntity taskEntity = modelMapper.map(task, TaskEntity.class);
 
@@ -169,10 +187,12 @@ public class TaskServiceImp implements TaskService {
         TaskEntity taskEntity = taskRepo.findByTaskId(taskId);
         if (taskEntity == null)
             throw new ServiceException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
+        if(!checkIfUserInTeam(taskDto))
+            throw new ServiceException(ErrorMessages.USER_IS_NOT_IN_TEAM.getErrorMessage());
+
 
         ModelMapper modelMapper = new ModelMapper();
 
-        taskEntity.setTaskId(taskDto.getTaskId());
         taskEntity.setTitle(taskDto.getTitle());
         taskEntity.setDescription(taskDto.getDescription());
         taskEntity.setStatus(taskDto.getStatus());
@@ -250,5 +270,17 @@ public class TaskServiceImp implements TaskService {
                 oldTeamFromRepo.removeTask(taskToUpdate);
             }
         }
+    }
+
+    private boolean checkIfUserInTeam(TaskDto task){
+
+        TeamEntity team = teamRepo.findByTeamId(task.getTeamDetails().getTeamId());
+        UserEntity user  = userRepo.findByUserId(task.getUserDetails().getUserId());
+        if(team != null){
+            if(user != null){
+                return team.getUsers().contains(user);
+            }
+        }
+        return true;
     }
 }

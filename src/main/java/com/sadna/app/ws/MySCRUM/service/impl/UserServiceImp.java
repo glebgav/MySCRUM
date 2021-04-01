@@ -50,6 +50,9 @@ public class UserServiceImp implements UserService {
         if(user.getPassword() == null || user.getEmail() == null || user.getFirstName() == null || user.getLastName() == null ||
                 user.getIsManager() == null) throw  new ServiceException(ErrorMessages.MISSING_REQUIRED_FIELD.getErrorMessage());
 
+        if(userRepo.findByEmail(user.getEmail()) != null)
+            throw  new ServiceException(ErrorMessages.USER_ALREADY_EXISTS.getErrorMessage());
+
         ModelMapper modelMapper = new ModelMapper();
         String publicUserId = utils.generateUserId(20);
         user.setUserId(publicUserId);
@@ -60,6 +63,8 @@ public class UserServiceImp implements UserService {
                 TaskEntity taskFromRepo = taskRepo.findByTaskId(tasks.get(i).getTaskId());
                 TaskDto newTask;
                 if (taskFromRepo != null) {
+                    if(!checkIfTaskIsValid(taskFromRepo, user.getTeams()))
+                        throw new ServiceException(ErrorMessages.TASK_IS_ASSIGNED_TO_WRONG_TEAM.getErrorMessage());
                     newTask = modelMapper.map(taskFromRepo, TaskDto.class);
                 } else {
                     newTask = tasks.get(i);
@@ -137,8 +142,18 @@ public class UserServiceImp implements UserService {
         if(userEntity==null)
             throw new ServiceException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
 
-        if(user.getPassword() == null || user.getEmail() == null || user.getFirstName() == null || user.getLastName() == null ||
+        if(user.getEmail() == null || user.getFirstName() == null || user.getLastName() == null ||
         user.getIsManager() == null) throw  new ServiceException(ErrorMessages.MISSING_REQUIRED_FIELD.getErrorMessage());
+
+        // check if for all tasks , the team is assigned to the user
+        List<TaskDto> tasks = user.getTasks();
+        if(tasks != null){
+            List<TeamDto> teams = user.getTeams();
+            for(TaskDto task: tasks){
+                if(!checkIfTaskIsValid(taskRepo.findByTaskId(task.getTaskId()), teams))
+                    throw new ServiceException(ErrorMessages.TASK_IS_ASSIGNED_TO_WRONG_TEAM.getErrorMessage());
+            }
+        }
 
         userEntity.setEmail(user.getEmail());
         userEntity.setFirstName(user.getFirstName());
@@ -239,5 +254,21 @@ public class UserServiceImp implements UserService {
                 userToUpdate.removeAllTeams();
             }
         }
+    }
+
+    private boolean checkIfTaskIsValid(TaskEntity taskFromRepo, List<TeamDto> teams) {
+        if(taskFromRepo != null && taskFromRepo.getTeamDetails() != null){
+            ModelMapper modelMapper = new ModelMapper();
+            TaskDto taskToCheck = modelMapper.map(taskFromRepo, TaskDto.class);
+            if(teams != null){
+                for(TeamDto team: teams){
+                    if(team.getTeamId().equals(taskToCheck.getTeamDetails().getTeamId()))
+                        return true;
+                }
+                return false;
+            }
+            else return taskToCheck.getTeamDetails() == null;
+        }
+        return true;
     }
 }

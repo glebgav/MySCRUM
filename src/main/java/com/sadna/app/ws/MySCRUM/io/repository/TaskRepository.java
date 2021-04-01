@@ -16,4 +16,5 @@ public interface TaskRepository extends PagingAndSortingRepository<TaskEntity,Lo
 
     Iterable<TaskEntity> findAllByTeamDetails(TeamEntity teamEntity);
 
+    TaskEntity findByTitle(String title);
 }
