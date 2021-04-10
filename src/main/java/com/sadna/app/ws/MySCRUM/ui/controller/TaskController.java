@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class that represents all the api for task management (REST controller)
+ */
 @RestController
 @RequestMapping("tasks")
 public class TaskController {

@@ -5,6 +5,10 @@ import lombok.Setter;
 
 import java.util.List;
 
+
+/**
+ * Response model for User
+ */
 @Getter
 @Setter
 public class UserRest {

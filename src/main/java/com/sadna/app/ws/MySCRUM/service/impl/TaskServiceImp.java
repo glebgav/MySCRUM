@@ -24,6 +24,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Service for task api
+ */
 @Service
 public class TaskServiceImp implements TaskService {
 
@@ -184,9 +187,11 @@ public class TaskServiceImp implements TaskService {
     @Override
     public TaskDto updateTask(String taskId, TaskDto taskDto) {
         if(taskDto.getTitle() == null ) throw  new ServiceException(ErrorMessages.MISSING_REQUIRED_FIELD.getErrorMessage());
+
         TaskEntity taskEntity = taskRepo.findByTaskId(taskId);
         if (taskEntity == null)
             throw new ServiceException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
+
         if(!checkIfUserInTeam(taskDto))
             throw new ServiceException(ErrorMessages.USER_IS_NOT_IN_TEAM.getErrorMessage());
 
@@ -221,7 +226,11 @@ public class TaskServiceImp implements TaskService {
     }
 
 
-
+    /**
+     * update users with new task details
+     * @param updatedTask updated task from client
+     * @param taskToUpdate task entity in Db
+     */
     private void updateUsers(TaskDto updatedTask, TaskEntity taskToUpdate){
         UserEntity newUserFromRepo;
 
@@ -247,6 +256,11 @@ public class TaskServiceImp implements TaskService {
         }
     }
 
+    /**
+     * update team with new task details
+     * @param updatedTask updated task from client
+     * @param taskToUpdate task entity in Db
+     */
     private void updateTeams(TaskDto updatedTask, TaskEntity taskToUpdate){
         TeamEntity newTeamFromRepo;
 
@@ -272,13 +286,19 @@ public class TaskServiceImp implements TaskService {
         }
     }
 
+    /**
+     * check if user of current task is a member of the team of current task
+     * @param task task to check
+     * @return is user in team
+     */
     private boolean checkIfUserInTeam(TaskDto task){
-
-        TeamEntity team = teamRepo.findByTeamId(task.getTeamDetails().getTeamId());
-        UserEntity user  = userRepo.findByUserId(task.getUserDetails().getUserId());
-        if(team != null){
-            if(user != null){
-                return team.getUsers().contains(user);
+        if(task.getTeamDetails() != null && task.getUserDetails() != null){
+            TeamEntity team = teamRepo.findByTeamId(task.getTeamDetails().getTeamId());
+            UserEntity user  = userRepo.findByUserId(task.getUserDetails().getUserId());
+            if(team != null){
+                if(user != null){
+                    return team.getUsers().contains(user);
+                }
             }
         }
         return true;

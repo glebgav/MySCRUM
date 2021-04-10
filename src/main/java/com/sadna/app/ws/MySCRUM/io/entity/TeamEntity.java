@@ -6,6 +6,9 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * Team Entity (ORM)
+ */
 @Entity(name="teams")
 @Getter
 @Setter

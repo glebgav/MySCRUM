@@ -5,6 +5,9 @@ import com.sadna.app.ws.MySCRUM.shared.dto.TeamDto;
 
 import java.util.List;
 
+/**
+ * Interface service for task api.
+ */
 public interface TaskService {
     TaskDto createTask(TaskDto taskDto);
 

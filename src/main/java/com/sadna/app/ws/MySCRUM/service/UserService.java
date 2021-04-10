@@ -5,6 +5,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.List;
 
+/**
+ * Interface service for user api.
+ */
 public interface UserService extends UserDetailsService {
     UserDto createUser(UserDto user);
     UserDto getUser(String email);

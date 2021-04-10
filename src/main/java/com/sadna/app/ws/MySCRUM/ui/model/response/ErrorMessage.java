@@ -4,9 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import java.util.Date;
 
+/**
+ * Response model for error message
+ */
 @Getter
 @Setter
 @NoArgsConstructor

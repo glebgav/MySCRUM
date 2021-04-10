@@ -14,11 +14,13 @@ import org.modelmapper.TypeToken;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class that represents all the api for user management (REST controller)
+ */
 @RestController
 @RequestMapping("users")
 public class UserController {

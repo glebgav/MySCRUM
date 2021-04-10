@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-
+/**
+ * Class that represents all the api for team management (REST controller)
+ */
 @RestController
 @RequestMapping("teams")
 public class TeamController {

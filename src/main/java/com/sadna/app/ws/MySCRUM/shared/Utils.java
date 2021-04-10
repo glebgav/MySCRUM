@@ -7,20 +7,35 @@ import java.security.SecureRandom;
 
 import java.util.Random;
 
+/**
+ * Utils class
+ */
 @Service
 public class Utils {
 
     private final Random RANDOM = new SecureRandom();
     private final String ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
+    /**
+     * @param length desired length
+     * @return new UserId
+     */
     public String generateUserId(int length) {
         return generateRandomString(length);
     }
 
+    /**
+     * @param length desired length
+     * @return new TaskId
+     */
     public String generateTaskId(int length) {
         return generateRandomString(length);
     }
 
+    /**
+     * @param length desired length
+     * @return new TeamId
+     */
     public String generateTeamId(int length) {
         return generateRandomString(length);
     }

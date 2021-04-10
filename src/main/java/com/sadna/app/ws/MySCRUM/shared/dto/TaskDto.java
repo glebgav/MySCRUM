@@ -4,6 +4,9 @@ import lombok.Getter;
 import lombok.Setter;
 import java.io.Serializable;
 
+/**
+ * Data transfer object for Task ( link between Entity models and Rest models)
+ */
 @Getter
 @Setter
 public class TaskDto implements Serializable {

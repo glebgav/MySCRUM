@@ -3,7 +3,9 @@ package com.sadna.app.ws.MySCRUM.service;
 import com.sadna.app.ws.MySCRUM.shared.dto.TeamDto;
 
 import java.util.List;
-
+/**
+ * Interface service for team api.
+ */
 public interface TeamService {
     TeamDto createTeam(TeamDto teamDto);
 

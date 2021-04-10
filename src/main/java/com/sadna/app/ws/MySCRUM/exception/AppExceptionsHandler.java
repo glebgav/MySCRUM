@@ -10,9 +10,11 @@ import org.springframework.web.context.request.WebRequest;
 
 import java.util.Date;
 
+/**
+ * Helper class for managing exception
+ */
 @ControllerAdvice
 public class AppExceptionsHandler {
-
     @ExceptionHandler(value = {ServiceException.class})
     public ResponseEntity<Object> handleServiceException(ServiceException ex , WebRequest request){
 

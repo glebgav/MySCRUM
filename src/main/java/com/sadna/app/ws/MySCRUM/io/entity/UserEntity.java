@@ -6,7 +6,9 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
 
-
+/**
+ * User Entity (ORM)
+ */
 @Entity(name="users")
 @Getter
 @Setter

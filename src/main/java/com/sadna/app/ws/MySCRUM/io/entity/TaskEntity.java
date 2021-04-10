@@ -2,12 +2,13 @@ package com.sadna.app.ws.MySCRUM.io.entity;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.catalina.User;
-
 import javax.persistence.*;
 import java.io.Serializable;
 
 
+/**
+ * Task Entity (ORM)
+ */
 @Entity(name="tasks")
 @Getter
 @Setter

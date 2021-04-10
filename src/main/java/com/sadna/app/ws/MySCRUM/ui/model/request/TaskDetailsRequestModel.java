@@ -3,6 +3,9 @@ package com.sadna.app.ws.MySCRUM.ui.model.request;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Request model for Task details
+ */
 @Getter
 @Setter
 public class TaskDetailsRequestModel {

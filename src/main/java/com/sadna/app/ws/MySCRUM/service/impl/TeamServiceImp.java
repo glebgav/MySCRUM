@@ -19,10 +19,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
-
+/**
+ * Service for team api
+ */
 @Service
 public class TeamServiceImp implements TeamService {
 
@@ -39,7 +40,6 @@ public class TeamServiceImp implements TeamService {
     Utils utils;
 
     @Override
-    @Transactional
     public TeamDto createTeam(TeamDto team) {
         ModelMapper modelMapper = new ModelMapper();
 
@@ -87,13 +87,11 @@ public class TeamServiceImp implements TeamService {
         String publicTeamId = utils.generateTeamId(20);
         teamEntity.setTeamId(publicTeamId);
 
-
         TeamEntity storedTeamDetails = teamRepo.save(teamEntity);
 
-        if (teamEntity.getUsers() != null) {
 
+        if (teamEntity.getUsers() != null) {
             for (UserEntity user : teamEntity.getUsers()) {
-                user.addTeam(teamEntity);
                 userRepo.save(user);
             }
         }
@@ -103,6 +101,8 @@ public class TeamServiceImp implements TeamService {
                 taskRepo.save(task);
             }
         }
+
+
 
         return modelMapper.map(storedTeamDetails, TeamDto.class);
 
@@ -200,7 +200,11 @@ public class TeamServiceImp implements TeamService {
 
     }
 
-
+    /**
+     * update users with new team details
+     * @param updatedTeam updated team from client
+     * @param teamToUpdate team entity in Db
+     */
     private void updateUsers(TeamDto updatedTeam, TeamEntity teamToUpdate) {
         List<UserDto> newUsers = updatedTeam.getUsers();
         if (newUsers != null) {
@@ -218,7 +222,11 @@ public class TeamServiceImp implements TeamService {
             }
         }
     }
-
+    /**
+     * update tasks with new team details
+     * @param updatedTeam updated team from client
+     * @param teamToUpdate team entity in Db
+     */
     private void updateTasks(TeamDto updatedTeam, TeamEntity teamToUpdate) {
         List<TaskDto> newTasks = updatedTeam.getTasks();
         if (newTasks != null) {
@@ -237,6 +245,13 @@ public class TeamServiceImp implements TeamService {
         }
     }
 
+
+    /**
+     * checks if task from Db is attached to a user that is not a member of the team
+     * @param taskFromRepo task from Db
+     * @param users list of users from client
+     * @return task is valid
+     */
     private boolean checkIfTaskIsValid(TaskEntity taskFromRepo, List<UserDto> users) {
         if(taskFromRepo != null && taskFromRepo.getUserDetails() != null){
             ModelMapper modelMapper = new ModelMapper();

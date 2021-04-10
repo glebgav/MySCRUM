@@ -6,6 +6,9 @@ import lombok.Setter;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * Data transfer object for User ( link between Entity models and Rest models)
+ */
 @Getter
 @Setter
 public class UserDto implements Serializable {

@@ -1,6 +1,9 @@
 package com.sadna.app.ws.MySCRUM.ui.model.response;
 
 
+/**
+ * Helper class for exception handling
+ */
 public enum ErrorMessages {
 
     MISSING_REQUIRED_FIELD("Missing required field. Please check documentation for required fields"),

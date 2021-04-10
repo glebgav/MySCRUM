@@ -27,7 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-
+/**
+ * Service for user api
+ */
 @Service
 public class UserServiceImp implements UserService {
     @Autowired
@@ -220,6 +222,11 @@ public class UserServiceImp implements UserService {
         return new User(userEntity.getEmail(),userEntity.getEncryptedPassword(), new ArrayList<>());
     }
 
+    /**
+     * update tasks with new user details
+     * @param updatedUser updated user form client
+     * @param userToUpdate user from Db
+     */
     private void updateTasks(UserDto updatedUser, UserEntity userToUpdate) {
         List<TaskDto> newTasks = updatedUser.getTasks();
         if (newTasks != null) {
@@ -237,7 +244,11 @@ public class UserServiceImp implements UserService {
             }
         }
     }
-
+    /**
+     * update teams with new user details
+     * @param updatedUser updated user form client
+     * @param userToUpdate user from Db
+     */
     private void updateTeams(UserDto updatedUser, UserEntity userToUpdate) {
         List<TeamDto> newTeams = updatedUser.getTeams();
         if (newTeams != null) {
@@ -256,6 +267,12 @@ public class UserServiceImp implements UserService {
         }
     }
 
+    /**
+     * checks if task from Db is attached to a team that not belong to the user
+     * @param taskFromRepo task from Db
+     * @param teams list of teams from client
+     * @return task is valid
+     */
     private boolean checkIfTaskIsValid(TaskEntity taskFromRepo, List<TeamDto> teams) {
         if(taskFromRepo != null && taskFromRepo.getTeamDetails() != null){
             ModelMapper modelMapper = new ModelMapper();

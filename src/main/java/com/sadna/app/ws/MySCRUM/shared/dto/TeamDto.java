@@ -5,6 +5,9 @@ import lombok.Setter;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * Data transfer object for Team ( link between Entity models and Rest models)
+ */
 @Getter
 @Setter
 public class TeamDto implements Serializable {

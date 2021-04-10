@@ -4,7 +4,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
-
+/**
+ * Request model for Team details
+ */
 @Getter
 @Setter
 public class TeamDetailsRequestModel {

@@ -5,7 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
-
+/**
+ * Response model for Team
+ */
 @Getter
 @Setter
 public class TeamRest {

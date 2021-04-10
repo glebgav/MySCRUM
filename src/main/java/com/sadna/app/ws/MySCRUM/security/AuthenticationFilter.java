@@ -2,12 +2,14 @@ package com.sadna.app.ws.MySCRUM.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sadna.app.ws.MySCRUM.SpringApplicationContext;
+import com.sadna.app.ws.MySCRUM.service.TaskService;
 import com.sadna.app.ws.MySCRUM.service.UserService;
 import com.sadna.app.ws.MySCRUM.shared.dto.UserDto;
 import com.sadna.app.ws.MySCRUM.ui.model.request.UserLoginRequestModel;
 import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -23,6 +25,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 
+/**
+ * Authentication filter for users
+ */
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
 
@@ -47,11 +52,9 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     @Override
     public void  successfulAuthentication(HttpServletRequest req, HttpServletResponse res,
-                                                   FilterChain chain, Authentication auth )
-            throws IOException, ServletException {
+                                                   FilterChain chain, Authentication auth ) {
 
         String userName = ((User)auth.getPrincipal()).getUsername();
-        // String tokenSecret = new SecurityConstants().getTokenSecret();
 
         String token = Jwts.builder()
                 .setSubject(userName)

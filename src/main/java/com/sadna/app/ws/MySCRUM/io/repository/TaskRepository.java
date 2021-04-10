@@ -5,9 +5,11 @@ import com.sadna.app.ws.MySCRUM.io.entity.TeamEntity;
 import com.sadna.app.ws.MySCRUM.io.entity.UserEntity;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
 
+/**
+ * Interface connection with the task table in db
+ */
 @Repository
 public interface TaskRepository extends PagingAndSortingRepository<TaskEntity,Long> {
     List<TaskEntity>  findAllByUserDetails(UserEntity userEntity);
